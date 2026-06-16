@@ -207,6 +207,29 @@ body{
 .pscs{font-family:'Orbitron',monospace;font-size:10px;color:#b400ff;}
 .pscs.dim{color:#4a6a8a;}
 .pscs.owned{color:#00ff88;font-size:8px;}
+/* CHALLENGE CARDS */
+.chal-card{background:#0a1628;border:1px solid rgba(255,170,0,0.3);border-radius:8px;padding:10px 12px;cursor:pointer;margin-bottom:0;transition:border-color .2s;}
+.chal-card:active{transform:scale(.98);}
+.chal-card.selected{border-color:rgba(255,170,0,0.8);background:linear-gradient(135deg,#1a1000,#0a1628);}
+.chal-card.hard{border-color:rgba(255,50,50,0.4);}
+.chal-card.hard.selected{border-color:rgba(255,50,50,0.9);background:linear-gradient(135deg,#1a0000,#0a1628);}
+.chal-nm{font-family:'Orbitron',monospace;font-size:9px;color:#ffaa00;letter-spacing:.5px;}
+.chal-card.hard .chal-nm{color:#ff5050;}
+.chal-ds{font-size:8px;color:#4a6a8a;margin-top:2px;}
+.chal-rew{font-size:8px;color:#00ff88;margin-top:3px;font-family:'Orbitron',monospace;}
+/* PRESTIGE MILESTONES */
+.pmil-list{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.pmil{background:#0a1628;border:1px solid rgba(180,0,255,0.15);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;}
+.pmil.done{border-color:rgba(0,255,136,0.4);background:linear-gradient(135deg,#091a0f,#0a1628);}
+.pmil-ico{font-size:16px;min-width:22px;}
+.pmil-inf{flex:1;}
+.pmil-nm{font-family:'Orbitron',monospace;font-size:8px;color:#c8e0ff;letter-spacing:.5px;}
+.pmil-ds{font-size:7px;color:#4a6a8a;margin-top:1px;}
+.pmil-rew{font-size:8px;color:#b400ff;font-family:'Orbitron',monospace;}
+.pmil.done .pmil-rew{color:#00ff88;}
+/* OMEGA RESET BTN */
+.omega-btn{width:100%;padding:12px;background:linear-gradient(135deg,#1a0000,#0d0000);border:1px solid rgba(255,0,80,0.4);border-radius:10px;color:#ff0050;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;text-shadow:0 0 10px #ff0050;margin-bottom:10px;display:block;text-align:center;}
+.omega-btn.lk{opacity:0.3;pointer-events:none;}
 
 /* THEME */
 .throw{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
@@ -271,25 +294,61 @@ body{
 <!-- PATH MODAL -->
 <div class="overlay" id="pathModal" style="display:none">
   <div class="mdl">
-    <div class="mdl-h">⬡ CHOOSE PATH</div>
-    <div style="font-size:9px;color:#4a6a8a;margin-bottom:8px">Stacks permanently every prestige</div>
-    <div class="path-opts">
-      <div class="popt" id="pathTap" style="border-color:rgba(255,107,0,0.5)">
+    <div class="mdl-h">⬡ CHOOSE YOUR PATH</div>
+    <div style="font-size:9px;color:#4a6a8a;margin-bottom:10px">Stacks permanently every prestige</div>
+    <div class="path-opts" style="flex-wrap:wrap;gap:6px;">
+      <div class="popt" id="pathTap" style="border-color:rgba(255,107,0,0.5);min-width:calc(33% - 4px)">
         <div class="popt-ico">⚡</div>
         <div class="popt-nm" style="color:#ff6b00">TAP LORD</div>
         <div class="popt-ds">+100% tap power</div>
       </div>
-      <div class="popt" id="pathAuto" style="border-color:rgba(0,255,136,0.5)">
+      <div class="popt" id="pathAuto" style="border-color:rgba(0,255,136,0.5);min-width:calc(33% - 4px)">
         <div class="popt-ico">🤖</div>
         <div class="popt-nm" style="color:#00ff88">AUTO EMPIRE</div>
         <div class="popt-ds">+100% auto income</div>
       </div>
-      <div class="popt" id="pathHybrid" style="border-color:rgba(180,0,255,0.5)">
+      <div class="popt" id="pathHybrid" style="border-color:rgba(180,0,255,0.5);min-width:calc(33% - 4px)">
         <div class="popt-ico">🌀</div>
         <div class="popt-nm" style="color:#b400ff">HYBRID LORD</div>
         <div class="popt-ds">+50% tap &amp; auto</div>
       </div>
+      <div class="popt" id="pathXP" style="border-color:rgba(255,220,0,0.5);min-width:calc(33% - 4px)">
+        <div class="popt-ico">⭐</div>
+        <div class="popt-nm" style="color:#ffdd00">XP MASTER</div>
+        <div class="popt-ds">+200% XP gain</div>
+      </div>
+      <div class="popt" id="pathCrit" style="border-color:rgba(255,0,80,0.5);min-width:calc(33% - 4px)">
+        <div class="popt-ico">💥</div>
+        <div class="popt-nm" style="color:#ff0050">CRIT KING</div>
+        <div class="popt-ds">Crits 25% chance +x30</div>
+      </div>
+      <div class="popt" id="pathCombo" style="border-color:rgba(0,200,255,0.5);min-width:calc(33% - 4px)">
+        <div class="popt-ico">🔥</div>
+        <div class="popt-nm" style="color:#00c8ff">COMBO GOD</div>
+        <div class="popt-ds">Max combo x50, faster build</div>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- CHALLENGE MODAL -->
+<div class="overlay" id="challengeModal" style="display:none">
+  <div class="mdl">
+    <div class="mdl-h">🎯 PRESTIGE CHALLENGE</div>
+    <div style="font-size:9px;color:#4a6a8a;margin-bottom:8px">Accept a challenge for extra bonus on top of your path!</div>
+    <div id="challengeList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;text-align:left;"></div>
+    <div class="mdl-btn" id="skipChallenge" style="background:rgba(0,0,0,0.3);border-color:rgba(100,100,100,0.3);color:#4a6a8a;">Skip — No Challenge</div>
+  </div>
+</div>
+
+<!-- OMEGA RESET MODAL -->
+<div class="overlay" id="omegaModal" style="display:none">
+  <div class="mdl">
+    <div class="mdl-h" style="color:#ff0050">☠ OMEGA RESET</div>
+    <div style="font-size:10px;color:#ff6b00;margin-bottom:8px;line-height:1.5">WARNING: This resets EVERYTHING including prestige count, robots and prestige shop — but grants a permanent x10 multiplier and exclusive Omega rewards!</div>
+    <div style="font-family:'Orbitron',monospace;font-size:22px;color:#ff0050;text-shadow:0 0 20px #ff0050;margin:10px 0" id="omegaReq">Need 1 Prestige first</div>
+    <div class="mdl-btn" id="omegaConfirm" style="background:linear-gradient(135deg,#300000,#1a0000);border-color:rgba(255,0,80,0.5);color:#ff0050;margin-top:8px">☠ CONFIRM OMEGA RESET</div>
+    <div class="mdl-btn" id="omegaCancel" style="background:rgba(0,0,0,0.3);border-color:rgba(100,100,100,0.3);color:#4a6a8a;margin-top:4px">Cancel</div>
   </div>
 </div>
 
@@ -393,12 +452,17 @@ body{
     <div class="throw" id="throw"></div>
     <div class="sec">PATH HISTORY</div>
     <div class="stcard" id="pathHist"></div>
+    <div class="sec">PRESTIGE MILESTONES</div>
+    <div class="pmil-list" id="pmilList"></div>
     <div class="sec">NEURAL RESET</div>
-    <div style="font-size:8px;color:#4a6a8a;margin-bottom:8px">Reset all for permanent multiplier + path bonus.</div>
+    <div style="font-size:8px;color:#4a6a8a;margin-bottom:8px">Reset all for permanent multiplier + path bonus + optional challenge.</div>
     <div class="pbtn lk" id="pbtn">
       ⬡ NEURAL RESET — PRESTIGE ⬡<br>
       <span id="plbl" style="font-size:8px;opacity:0.7">REACH 10K TOTAL CREDITS</span>
     </div>
+    <div class="sec">OMEGA RESET</div>
+    <div style="font-size:8px;color:#4a6a8a;margin-bottom:8px">☠ Resets EVERYTHING for a permanent ×10 boost + exclusive rewards.</div>
+    <div class="omega-btn lk" id="omegaBtn">☠ OMEGA RESET — TOTAL WIPE ☠<br><span id="omegaLbl" style="font-size:8px;opacity:0.7">NEED 5 PRESTIGES FIRST</span></div>
   </div>
 
   <!-- STATS -->
@@ -516,6 +580,29 @@ var LOGIN_REWARDS = [
   {ic:'💰',r:500},{ic:'⚡',r:1000},{ic:'🔥',r:2000},{ic:'💎',r:5000},
   {ic:'🚀',r:10000},{ic:'🌌',r:25000},{ic:'♾️',r:100000}
 ];
+// ── PRESTIGE CHALLENGES ───────────────────────────────────────────────────────
+var CHALLENGES = [
+  {id:'c1', n:'SPEED RUN',     ds:'Reach 100K credits within 5 min of prestige', hard:false, rew:'×1.5 prestige mult bonus', mult:1.5, type:'speed',  goal:100000,  time:300},
+  {id:'c2', n:'NO AUTO',       ds:'Earn 50K credits with tap only (no auto upg)', hard:false, rew:'+500 prestige points',     pts:500,  type:'notap',  goal:50000},
+  {id:'c3', n:'COMBO MASTER',  ds:'Reach x15 combo during this prestige',        hard:false, rew:'+300 prestige points',     pts:300,  type:'combo',  goal:15},
+  {id:'c4', n:'UPGRADE RUSH',  ds:'Buy 20 upgrades before 1K credits',           hard:false, rew:'+200 prestige points',     pts:200,  type:'upgrush',goal:20},
+  {id:'c5', n:'IRON FIST',     ds:'Tap 500 times in this prestige run',          hard:false, rew:'+400 prestige points',     pts:400,  type:'taps',   goal:500},
+  {id:'c6', n:'NO BOOST',      ds:'Reach 500K credits without using boost',      hard:true,  rew:'×2.0 prestige mult bonus', mult:2.0, type:'noboost',goal:500000},
+  {id:'c7', n:'CRIT STORM',    ds:'Land 50 critical hits in one prestige',       hard:true,  rew:'+1000 prestige points',    pts:1000, type:'crits',  goal:50},
+  {id:'c8', n:'SPEED GOD',     ds:'Reach 1M credits within 3 min of prestige',  hard:true,  rew:'×3.0 prestige mult bonus', mult:3.0, type:'speed',  goal:1000000, time:180},
+];
+
+// ── PRESTIGE MILESTONES ────────────────────────────────────────────────────────
+var PMILESTONES = [
+  {n:'FIRST RESET',    ds:'Complete your first prestige',         goal:1,  ic:'🌟', rew:'Unlock Prestige Shop',         pts:0,   special:'shop'},
+  {n:'VETERAN',        ds:'Prestige 5 times',                     goal:5,  ic:'⚡', rew:'+500 Prestige Points',         pts:500},
+  {n:'OMEGA WORTHY',   ds:'Prestige 5 times to unlock Omega',     goal:5,  ic:'☠',  rew:'Unlock Omega Reset',           pts:0,   special:'omega'},
+  {n:'DECADE RESET',   ds:'Prestige 10 times',                    goal:10, ic:'💎', rew:'×1.5 permanent mult bonus',    pts:0,   special:'mult', val:1.5},
+  {n:'MASTER RESETTER',ds:'Prestige 25 times',                    goal:25, ic:'🚀', rew:'×2.0 permanent mult bonus',    pts:0,   special:'mult', val:2.0},
+  {n:'ASCENDED',       ds:'Prestige 50 times',                    goal:50, ic:'🌌', rew:'All robot bonuses doubled',    pts:0,   special:'robdbl'},
+  {n:'TRANSCENDENT',   ds:'Prestige 100 times',                   goal:100,ic:'♾️', rew:'×5.0 permanent mult bonus',   pts:0,   special:'mult', val:5.0},
+];
+
 var THEMES = [
   {id:'',   lbl:'🔵 DEFAULT',col:'#00f5ff'},
   {id:'pink',lbl:'🩷 PINK',  col:'#ff00aa'},
@@ -536,12 +623,16 @@ var G = {
   lv:1, xp:0, ls:Date.now(), snd:true,
   combo:1, cTimer:0, streak:0, sTimer:0,
   bAct:0, bCool:0, ppts:0, psOwn:{},
-  tapB:1, autoB:1, robots:{}, theme:'',
+  tapB:1, autoB:1, xpB:1, critB:1, comboB:1,
+  robots:{}, theme:'',
   dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0,
   bCombo:1, totUpg:0, crits:0, puAct:{},
-  pPaths:{tap:0,auto:0,hybrid:0},
+  pPaths:{tap:0,auto:0,hybrid:0,xp:0,crit:0,combo:0},
   loginStreak:0, lastLogin:0, loginDay:0, loginClaimed:false,
-  milDone:{}, apsHist:[], lastApsRec:0, curTheme:''
+  milDone:{}, pmilDone:{}, apsHist:[], lastApsRec:0, curTheme:'',
+  activeChallenge:null, chalProgress:{}, chalFailed:{},
+  omegaCount:0, omegaMult:1, omegaRobots:{},
+  prestigeMultBonus:1,
 };
 
 // ── FORMAT ────────────────────────────────────────────────────────────────────
@@ -614,7 +705,7 @@ function calcCP() {
   v *= rb.tm * synM('c') * G.pm * G.tapB * shopB('tb');
   if (G.puAct.dbl) v *= 2;
   if (G.puAct.mgt) v *= 10;
-  return Math.max(1, v) * G.combo;
+  return Math.max(1, v) * G.combo * (G.comboB||1);
 }
 function upgCost(id) {
   var u = null;
@@ -787,8 +878,10 @@ function handleTap(e) {
   if (now - lastTapTime < 80) return; // debounce
   lastTapTime = now;
 
-  var isCrit = Math.random() < 0.1;
-  var critM = isCrit ? (5 + Math.random() * 15) : 1;
+  var critChance = 0.1 * (G.critB||1); if(critChance>0.5)critChance=0.5;
+  var isCrit = Math.random() < critChance;
+  var critMax = G.critB>=2 ? 30 : 15;
+  var critM = isCrit ? (5 + Math.random() * critMax) * (G.critB||1) : 1;
   var sm = streakMult();
   var pow = calcCP() * critM * sm;
 
@@ -796,11 +889,11 @@ function handleTap(e) {
   if (isCrit) { G.crits++; playCrit(); } else { playTap(pow); }
 
   G.sTimer = 2; G.streak++;
-  G.cTimer = 3; G.combo = Math.min(G.combo + 0.5, G.psOwn['cm'] ? 20 : 10);
+  G.cTimer = 3; var comboMax = (G.psOwn['cm'] ? 20 : 10) * (G.comboB||1); G.combo = Math.min(G.combo + 0.5 * (G.comboB||1), comboMax);
   G.dCmb = Math.max(G.dCmb, G.combo);
   G.bCombo = Math.max(G.bCombo, G.combo);
 
-  var xg = Math.max(1, Math.floor(pow * 0.1)) * (G.psOwn['xpm'] ? 2 : 1);
+  var xg = Math.max(1, Math.floor(pow * 0.1)) * (G.psOwn['xpm'] ? 2 : 1) * (G.xpB||1);
   G.xp += xg;
   while (G.xp >= xpFor(G.lv + 1)) {
     G.xp -= xpFor(G.lv + 1); G.lv++;
@@ -864,20 +957,155 @@ function startPrestige() {
   if (G.te < 10000) return;
   document.getElementById('pathModal').style.display = 'flex';
 }
+var pendingPath = '';
 function choosePath(p) {
   document.getElementById('pathModal').style.display = 'none';
-  G.pc++; G.pm = 1 + G.pc * 0.5; G.ppts += G.pc;
+  pendingPath = p;
+  // Show challenge modal
+  showChallengeModal();
+}
+function showChallengeModal() {
+  var html = '';
+  var available = CHALLENGES.slice().sort(function(){return Math.random()-0.5}).slice(0,4);
+  for (var i=0;i<available.length;i++) {
+    var ch = available[i];
+    html += '<div class="chal-card'+(ch.hard?' hard':'')+'" data-chalid="'+ch.id+'">';
+    html += '<div class="chal-nm">'+(ch.hard?'💀 ':'')+ch.n+'</div>';
+    html += '<div class="chal-ds">'+ch.ds+'</div>';
+    html += '<div class="chal-rew">Reward: '+ch.rew+'</div>';
+    html += '</div>';
+  }
+  document.getElementById('challengeList').innerHTML = html;
+  document.getElementById('challengeModal').style.display = 'flex';
+}
+function acceptChallenge(id) {
+  document.getElementById('challengeModal').style.display = 'none';
+  var ch = null;
+  for (var i=0;i<CHALLENGES.length;i++) if(CHALLENGES[i].id===id){ch=CHALLENGES[i];break;}
+  G.activeChallenge = ch ? JSON.parse(JSON.stringify(ch)) : null;
+  if (G.activeChallenge && G.activeChallenge.type === 'speed') {
+    G.activeChallenge.startTime = Date.now();
+  }
+  doPrestigeReset(pendingPath);
+}
+function skipChallenge() {
+  document.getElementById('challengeModal').style.display = 'none';
+  G.activeChallenge = null;
+  doPrestigeReset(pendingPath);
+}
+function doPrestigeReset(p) {
+  G.pc++; G.ppts += G.pc;
+  G.pm = (1 + G.pc * 0.5) * G.prestigeMultBonus * G.omegaMult;
   G.pPaths[p] = (G.pPaths[p] || 0) + 1;
   if (p === 'tap')    G.tapB = (G.tapB || 1) * 2;
   if (p === 'auto')   G.autoB = (G.autoB || 1) * 2;
   if (p === 'hybrid') { G.tapB = (G.tapB||1)*1.5; G.autoB = (G.autoB||1)*1.5; }
+  if (p === 'xp')     G.xpB = (G.xpB || 1) * 3;
+  if (p === 'crit')   G.critB = (G.critB || 1) * 1.5;
+  if (p === 'combo')  G.comboB = (G.comboB || 1) * 1.5;
   var sc = G.psOwn['sc'] ? 10000 : 0;
   G.e = sc; G.te = 0; G.tc = 0;
   G.upg = JSON.parse(JSON.stringify(DU));
   G.lv = 1; G.xp = 0; G.combo = 1; G.cTimer = 0; G.streak = 0;
+  G.dTaps=0; G.dEarn=0; G.dUpg=0; G.dCmb=0; G.dBst=0; G.dm={};
+  G.chalProgress = {};
   playPrestige(); updateCore();
-  notif('🌌 PRESTIGE x' + G.pc + ' — ' + p.toUpperCase() + ' PATH!', '#b400ff');
+  chkPMilestones();
+  notif('🌌 PRESTIGE x' + G.pc + ' — ' + p.toUpperCase() + (G.activeChallenge?' + CHALLENGE!':'') + ' PATH!', '#b400ff');
   showTab('main');
+}
+
+// ── OMEGA RESET ────────────────────────────────────────────────────────────────
+function showOmegaModal() {
+  if (G.pc < 5) return;
+  var req = document.getElementById('omegaReq');
+  if (req) req.textContent = 'ALL progress wiped. Gain ×10 forever!';
+  document.getElementById('omegaModal').style.display = 'flex';
+}
+function doOmegaReset() {
+  document.getElementById('omegaModal').style.display = 'none';
+  G.omegaCount++;
+  G.omegaMult = Math.pow(10, G.omegaCount);
+  // Save some robot unlocks as omega reward
+  G.omegaRobots = JSON.parse(JSON.stringify(G.robots));
+  // Full wipe
+  var saved = {omegaCount:G.omegaCount, omegaMult:G.omegaMult, omegaRobots:G.omegaRobots, snd:G.snd, curTheme:G.curTheme};
+  G = {
+    e:0, te:0, tc:0, pc:0, pm:G.omegaMult,
+    upg:{}, lv:1, xp:0, ls:Date.now(), snd:saved.snd,
+    combo:1, cTimer:0, streak:0, sTimer:0,
+    bAct:0, bCool:0, ppts:0, psOwn:{},
+    tapB:1, autoB:1, xpB:1, critB:1, comboB:1,
+    robots: saved.omegaRobots,
+    dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0,
+    bCombo:1, totUpg:0, crits:0, puAct:{},
+    pPaths:{tap:0,auto:0,hybrid:0,xp:0,crit:0,combo:0},
+    loginStreak:0, lastLogin:0, loginDay:0, loginClaimed:false,
+    milDone:{}, pmilDone:{}, apsHist:[], lastApsRec:0, curTheme:saved.curTheme,
+    activeChallenge:null, chalProgress:{}, chalFailed:{},
+    omegaCount:saved.omegaCount, omegaMult:saved.omegaMult, omegaRobots:saved.omegaRobots,
+    prestigeMultBonus:1,
+  };
+  playPrestige(); updateCore();
+  notif('☠ OMEGA RESET #'+G.omegaCount+' — ×'+fmt(G.omegaMult)+' FOREVER!', '#ff0050');
+  showTab('main');
+}
+
+// ── PRESTIGE MILESTONES ────────────────────────────────────────────────────────
+function chkPMilestones() {
+  for (var i=0;i<PMILESTONES.length;i++) {
+    var m = PMILESTONES[i];
+    if (!G.pmilDone[m.n] && G.pc >= m.goal) {
+      G.pmilDone[m.n] = true;
+      if (m.pts) { G.ppts += m.pts; notif('🏆 PRESTIGE MILESTONE: '+m.n+' +'+m.pts+' PTS!','#b400ff'); }
+      if (m.special === 'mult') { G.prestigeMultBonus = (G.prestigeMultBonus||1)*m.val; notif('🌟 MILESTONE: '+m.n+' — MULT ×'+m.val,'#ffaa00'); }
+      if (m.special === 'robdbl') { notif('🤖 MILESTONE: '+m.n+' — ROBOTS DOUBLED!','#00ff88'); }
+      playAch();
+    }
+  }
+  renderPMilestones();
+}
+function renderPMilestones() {
+  var el = document.getElementById('pmilList'); if(!el) return;
+  var html = '';
+  for (var i=0;i<PMILESTONES.length;i++) {
+    var m=PMILESTONES[i], done=!!G.pmilDone[m.n];
+    var prog = Math.min(G.pc, m.goal);
+    html += '<div class="pmil'+(done?' done':'')+'"><div class="pmil-ico">'+m.ic+'</div><div class="pmil-inf"><div class="pmil-nm">'+m.n+'</div><div class="pmil-ds">'+m.ds+' ('+prog+'/'+m.goal+')</div></div><div class="pmil-rew">'+(done?'✓ DONE':m.rew)+'</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+// ── CHALLENGE TRACKING ─────────────────────────────────────────────────────────
+function tickChallenge(dt) {
+  if (!G.activeChallenge) return;
+  var ch = G.activeChallenge;
+  var prog = G.chalProgress[ch.id] || 0;
+  var done = false, failed = false;
+  if (ch.type === 'speed') {
+    var elapsed = (Date.now() - (ch.startTime||Date.now())) / 1000;
+    if (G.te >= ch.goal) done = true;
+    if (elapsed > ch.time && !done) failed = true;
+  }
+  if (ch.type === 'taps'    && G.dTaps >= ch.goal)  done = true;
+  if (ch.type === 'combo'   && G.bCombo >= ch.goal)  done = true;
+  if (ch.type === 'crits'   && G.crits >= ch.goal)   done = true;
+  if (ch.type === 'upgrush' && G.totUpg >= ch.goal)  done = true;
+  if (ch.type === 'notap'   && G.te >= ch.goal)      done = true;
+  if (ch.type === 'noboost' && G.te >= ch.goal)      done = true;
+  if (failed) {
+    G.chalFailed[ch.id] = true;
+    G.activeChallenge = null;
+    notif('❌ CHALLENGE FAILED: '+ch.n,'#ff0050');
+    return;
+  }
+  if (done && !G.chalProgress['done_'+ch.id]) {
+    G.chalProgress['done_'+ch.id] = true;
+    if (ch.mult)  { G.pm *= ch.mult; notif('🎯 CHALLENGE DONE: '+ch.n+' — MULT ×'+ch.mult,'#ffaa00'); }
+    if (ch.pts)   { G.ppts += ch.pts; notif('🎯 CHALLENGE DONE: '+ch.n+' +'+ch.pts+' PTS','#ffaa00'); }
+    G.activeChallenge = null;
+    playAch();
+  }
 }
 function buyPs(id) {
   var it = null;
@@ -1048,8 +1276,24 @@ function render() {
   // prestige btn
   var pr = G.te >= 10000;
   var pb = document.getElementById('pbtn');
-  if (pb) { pb.className = 'pbtn' + (pr ? '' : ' lk'); document.getElementById('plbl').textContent = pr ? 'READY — GAIN ×'+(1+(G.pc+1)*0.5).toFixed(1)+' + PATH' : 'REACH 10K TOTAL CREDITS'; }
+  if (pb) { pb.className = 'pbtn' + (pr ? '' : ' lk'); document.getElementById('plbl').textContent = pr ? 'READY — GAIN ×'+(1+(G.pc+1)*0.5).toFixed(1)+' + PATH + CHALLENGE' : 'REACH 10K TOTAL CREDITS'; }
   var pp = document.getElementById('ppts'); if (pp) pp.textContent = G.ppts;
+  // Omega btn
+  var ob = document.getElementById('omegaBtn');
+  if (ob) {
+    var omReady = G.pc >= 5;
+    ob.className = 'omega-btn' + (omReady ? '' : ' lk');
+    var ol = document.getElementById('omegaLbl');
+    if (ol) ol.textContent = omReady ? 'READY — WIPE EVERYTHING FOR ×'+fmt(Math.pow(10,G.omegaCount+1)) : 'NEED '+(5-G.pc)+' MORE PRESTIGES';
+  }
+  // Active challenge indicator
+  if (G.activeChallenge) {
+    var ch = G.activeChallenge;
+    var elapsed = ch.type==='speed' ? ((Date.now()-(ch.startTime||Date.now()))/1000) : 0;
+    var timeLeft = ch.time ? Math.max(0, ch.time - elapsed) : 0;
+    var chalInfo = '🎯 CHALLENGE: '+ch.n+(timeLeft>0?' — '+Math.ceil(timeLeft)+'s':'');
+  }
+  renderPMilestones();
   renderClaimBtn();
   if (curTab === 'upgrades') { renderUpgrades(); renderSynergies(); }
 }
@@ -1194,6 +1438,17 @@ document.addEventListener('touchend', function(e) {
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
     if (id === 'pathAuto')   { choosePath('auto');   e.preventDefault(); return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); e.preventDefault(); return; }
+    if (id === 'pathXP')     { choosePath('xp');     e.preventDefault(); return; }
+    if (id === 'pathCrit')   { choosePath('crit');   e.preventDefault(); return; }
+    if (id === 'pathCombo')  { choosePath('combo');  e.preventDefault(); return; }
+    if (id === 'skipChallenge') { skipChallenge(); e.preventDefault(); return; }
+    if (id === 'omegaBtn' && !el.classList.contains('lk')) { showOmegaModal(); e.preventDefault(); return; }
+    if (id === 'omegaConfirm') { doOmegaReset(); e.preventDefault(); return; }
+    if (id === 'omegaCancel') { document.getElementById('omegaModal').style.display='none'; e.preventDefault(); return; }
+    if (cls.indexOf('chal-card') !== -1) {
+      var cid = el.getAttribute('data-chalid') || (el.closest && el.closest('[data-chalid]') && el.closest('[data-chalid]').getAttribute('data-chalid'));
+      if (cid) { acceptChallenge(cid); e.preventDefault(); return; }
+    }
     if (cls.indexOf('tab') !== -1 && id && id.indexOf('t-') === 0) { showTab(id.replace('t-','')); e.preventDefault(); return; }
     if (cls.indexOf('ubb') !== -1) {
       var uid2 = el.getAttribute('data-uid'), qty = el.getAttribute('data-qty');
@@ -1236,6 +1491,17 @@ document.addEventListener('click', function(e) {
     if (id === 'pathTap')    { choosePath('tap');    return; }
     if (id === 'pathAuto')   { choosePath('auto');   return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); return; }
+    if (id === 'pathXP')     { choosePath('xp');     return; }
+    if (id === 'pathCrit')   { choosePath('crit');   return; }
+    if (id === 'pathCombo')  { choosePath('combo');  return; }
+    if (id === 'skipChallenge') { skipChallenge(); return; }
+    if (id === 'omegaBtn' && !el.classList.contains('lk')) { showOmegaModal(); return; }
+    if (id === 'omegaConfirm') { doOmegaReset(); return; }
+    if (id === 'omegaCancel') { document.getElementById('omegaModal').style.display='none'; return; }
+    if (cls.indexOf('chal-card') !== -1) {
+      var cid = el.getAttribute('data-chalid') || (el.closest && el.closest('[data-chalid]') && el.closest('[data-chalid]').getAttribute('data-chalid'));
+      if (cid) { acceptChallenge(cid); return; }
+    }
     if (cls.indexOf('tab') !== -1 && id) { var t=id.replace('t-',''); if(t) showTab(t); return; }
     if (cls.indexOf('ucard') !== -1 || cls.indexOf('uinf') !== -1) {
       var uid = el.getAttribute('data-uid') || (el.closest && el.closest('[data-uid]') && el.closest('[data-uid]').getAttribute('data-uid'));
@@ -1275,7 +1541,7 @@ function tick() {
   if (G.bCool>0) G.bCool=Math.max(0,G.bCool-dt);
   if (G.cTimer>0) G.cTimer-=dt; else G.combo=Math.max(1,G.combo-0.5*dt);
   if (G.sTimer>0) G.sTimer-=dt; else G.streak=Math.max(0,G.streak-Math.ceil(dt));
-  chkRobots(); chkMissions(); chkAchievements(); recordAps();
+  chkRobots(); chkMissions(); chkAchievements(); recordAps(); tickChallenge(dt);
   render();
   setTimeout(tick, 100);
 }
@@ -1288,6 +1554,7 @@ window.addEventListener('beforeunload', save);
 
 load();
 updateCore();
+chkPMilestones();
 renderLoginStrip();
 renderClaimBtn();
 render();
