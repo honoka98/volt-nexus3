@@ -831,22 +831,20 @@ function load() {
     var offlineSecs = Math.min(elapsed, 72 * 3600);
     var gained = Math.floor(aps * offlineSecs);
 
-    // Add offline earnings directly to balance
-    G.e = (G.e || 0) + gained;
-    G.te = (G.te || 0) + gained;
+    // Store as pending - will be added when user taps COLLECT
+    window.OFFLINE_PENDING = gained;
 
-    // Save immediately with updated balance and new timestamp
+    // Set the timestamp now so we don't double-count
     G.ls = now;
-    localStorage.setItem(SK, JSON.stringify(G));
 
-    // Show modal
+    // Show modal with the pending amount
     var el1 = document.getElementById('offTime');
     var el2 = document.getElementById('offCred');
     var el3 = document.getElementById('offBalance');
     if (el1) el1.textContent = fmtT(Math.max(0, elapsed));
     if (el2) el2.textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (need Auto-Upgrades!)' : '');
-    if (el3) el3.textContent = 'APS=' + aps.toFixed(2) + ' | ' + Math.floor(offlineSecs) + 's | ' + fmt(G.e - gained) + '→' + fmt(G.e);
-    document.getElementById('offModal').style.display = 'flex';
+    if (el3) el3.textContent = 'Tap COLLECT to add: ' + fmt(G.e) + ' + ' + fmt(gained) + ' = ' + fmt(G.e + gained);
+    if (gained > 0) document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
     chkLoginDay();
@@ -859,8 +857,17 @@ function load() {
 }
 
 function collectOffline() {
+  var amount = window.OFFLINE_PENDING || 0;
+  if (amount > 0) {
+    G.e = (G.e || 0) + amount;
+    G.te = (G.te || 0) + amount;
+    window.OFFLINE_PENDING = 0;
+    // Force immediate save AND immediate display update
+    save();
+    document.getElementById('eVal').textContent = fmt(G.e);
+    notif('⚡ +' + fmt(amount) + ' CREDITS ADDED!', '#00ff88');
+  }
   document.getElementById('offModal').style.display = 'none';
-  // Credits are already in G.e and already saved — nothing else needed
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
