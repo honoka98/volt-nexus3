@@ -736,20 +736,22 @@ function save() {
   G.ls = Date.now();
   try { localStorage.setItem(SK, JSON.stringify(G)); } catch(e) {}
 }
+var pendingOfflineCredits = 0;
+
 function load() {
   try {
     var raw = localStorage.getItem(SK);
     if (!raw) { chkDailyReset(); chkLoginDay(); return; }
     var s = JSON.parse(raw);
     var el = (Date.now() - (s.ls || Date.now())) / 1000;
-    var u = JSON.parse(JSON.stringify(DU));
-    if (s.upg) {
-      for (var k in s.upg) { u[k] = s.upg[k]; }
-    }
 
+    // Load all saved state into G first
+    var u = JSON.parse(JSON.stringify(DU));
+    if (s.upg) { for (var k in s.upg) { u[k] = s.upg[k]; } }
     s.upg = u;
     for (var key in s) { G[key] = s[key]; }
-    // offline
+
+    // NOW calculate offline earnings using fully loaded G
     var baseA = 0;
     for (var i = 0; i < UPGRADES.length; i++) {
       if (UPGRADES[i].ef === 'a') baseA += UPGRADES[i].v * (G.upg[UPGRADES[i].id] || 0);
@@ -757,15 +759,29 @@ function load() {
     var rb = robB();
     baseA = (baseA + rb.aa) * rb.am * G.pm * (G.autoB || 1) * shopB('ab');
     var offM = G.psOwn['o2x'] ? 2 : 1;
-    var gained = baseA * Math.min(el, 72 * 3600) * offM;
-    G.e += gained; G.te += gained;
-    document.getElementById('offTime').textContent = fmtT(Math.max(0,el));
-    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (Buy Auto-Upgrades!)' : '');
-    if (el > 2) document.getElementById('offModal').style.display = 'flex';
+    var gained = Math.floor(baseA * Math.min(el, 72 * 3600) * offM);
+
+    // Store as pending — only credit when user taps COLLECT
+    pendingOfflineCredits = gained;
+
+    document.getElementById('offTime').textContent = fmtT(Math.max(0, el));
+    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' — Buy Auto-Upgrades for passive income!' : '');
+    document.getElementById('offModal').style.display = 'flex';
+
     chkDailyReset();
     chkLoginDay();
     applyTheme(G.curTheme || '');
   } catch(e) { chkDailyReset(); chkLoginDay(); }
+}
+
+function collectOffline() {
+  // Credit the pending offline earnings NOW and save immediately
+  G.e += pendingOfflineCredits;
+  G.te += pendingOfflineCredits;
+  pendingOfflineCredits = 0;
+  document.getElementById('offModal').style.display = 'none';
+  save(); // Save immediately so credits are never lost
+  notif('⚡ +' + fmt(G.e) + ' CREDITS COLLECTED!', '#00ff88');
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
@@ -1428,7 +1444,7 @@ document.addEventListener('touchend', function(e) {
     var id = el.id, cls = (el.className || '').toString();
 
     if (id === 'coreBtn' || (el.closest && el.closest('#coreBtn'))) { handleTap(e); e.preventDefault(); return; }
-    if (id === 'offBtn') { document.getElementById('offModal').style.display='none'; e.preventDefault(); return; }
+    if (id === 'offBtn') { collectOffline(); e.preventDefault(); return; }
     if (id === 'boostBtn') { activateBoost(); e.preventDefault(); return; }
     if (id === 'claimBtn' && cls.indexOf('claimed') === -1) { claimLogin(); e.preventDefault(); return; }
     if (id === 'pbtn' && !el.classList.contains('lk')) { startPrestige(); e.preventDefault(); return; }
@@ -1481,7 +1497,7 @@ document.addEventListener('click', function(e) {
     if (!el || el === document.body) break;
     var id = el.id, cls = el.className || '';
     if (id === 'coreBtn' || (el.closest && el.closest('#coreBtn'))) { handleTap(e); return; }
-    if (id === 'offBtn') { document.getElementById('offModal').style.display='none'; return; }
+    if (id === 'offBtn') { collectOffline(); return; }
     if (id === 'boostBtn') { activateBoost(); return; }
     if (id === 'claimBtn') { claimLogin(); return; }
     if (id === 'pbtn' && !el.classList.contains('lk')) { startPrestige(); return; }
