@@ -28,7 +28,7 @@ body{
     linear-gradient(90deg,rgba(0,245,255,0.025) 1px,transparent 1px);
   background-size:40px 40px;
 }
-.wrap{max-width:480px;margin:0 auto;padding:12px 12px calc(140px + env(safe-area-inset-bottom));}
+.wrap{max-width:480px;margin:0 auto;padding:12px 12px calc(140px + env(safe-area-inset-bottom));touch-action:pan-y;-webkit-overflow-scrolling:touch;overflow-y:auto;}
 
 /* HEADER */
 .hdr{padding:10px 0;text-align:center;border-bottom:1px solid rgba(0,245,255,0.15);margin-bottom:10px;position:relative;}
@@ -119,7 +119,7 @@ body{
 
 /* MISSIONS */
 .mlist{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
-.mcard{background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:8px;padding:9px 10px;display:flex;align-items:center;gap:8px;}
+.mcard{touch-action:pan-y;background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:8px;padding:9px 10px;display:flex;align-items:center;gap:8px;}
 .mcard.done{border-color:rgba(0,255,136,0.3);}
 .mico{font-size:18px;min-width:24px;}
 .minf{flex:1;}
@@ -150,8 +150,8 @@ body{
 .pu-tm{font-size:8px;color:#ffaa00;margin-top:1px;font-family:'Orbitron',monospace;}
 
 /* UPGRADES */
-.ulist{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
-.ucard{background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:9px;padding:10px;display:flex;align-items:center;gap:9px;cursor:pointer;position:relative;overflow:hidden;}
+.ulist{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;touch-action:pan-y;}
+.ucard{touch-action:pan-y;background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:9px;padding:10px;display:flex;align-items:center;gap:9px;cursor:pointer;position:relative;overflow:hidden;}
 .ucard.can{border-color:rgba(0,255,136,0.4);background:linear-gradient(135deg,#0a1628,#091a1a);}
 .ucard.max{opacity:0.4;}
 .ucard.syn{border-color:rgba(255,107,0,0.5);}
@@ -169,7 +169,7 @@ body{
 
 /* SYNERGIES */
 .synlist{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.syncard{background:#0a1628;border:1px solid rgba(255,107,0,0.2);border-radius:8px;padding:9px 10px;display:flex;align-items:center;gap:8px;}
+.syncard{touch-action:pan-y;background:#0a1628;border:1px solid rgba(255,107,0,0.2);border-radius:8px;padding:9px 10px;display:flex;align-items:center;gap:8px;}
 .syncard.active{border-color:rgba(255,107,0,0.6);background:linear-gradient(135deg,#150800,#0a1628);}
 .synico{font-size:14px;}
 .syninf{flex:1;}
@@ -181,7 +181,7 @@ body{
 
 /* ROBOTS */
 .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;}
-.rcard{background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:9px;padding:9px 5px;text-align:center;}
+.rcard{touch-action:pan-y;background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:9px;padding:9px 5px;text-align:center;}
 .rcard.un{border-color:rgba(0,245,255,0.3);}
 .rcard.rare{border-color:rgba(0,200,255,0.5);}
 .rcard.epic{border-color:rgba(180,0,255,0.5);}
@@ -197,7 +197,7 @@ body{
 
 /* PRESTIGE */
 .pslist{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
-.pscard{background:#0a1628;border:1px solid rgba(180,0,255,0.2);border-radius:9px;padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.pscard{touch-action:pan-y;background:#0a1628;border:1px solid rgba(180,0,255,0.2);border-radius:9px;padding:10px;display:flex;align-items:center;gap:10px;cursor:pointer;}
 .pscard.owned{border-color:rgba(0,255,136,0.3);opacity:0.7;}
 .pscard.can{border-color:rgba(180,0,255,0.5);}
 .psico{font-size:22px;min-width:30px;text-align:center;}
@@ -1134,7 +1134,19 @@ function renderStats() {
 
 // ── GLOBAL EVENT DELEGATION (works on iOS Safari) ────────────────────────────
 // Touch handler - passive so scrolling works, only fires on interactive elements
+var touchStartY = 0;
+var touchStartX = 0;
+document.addEventListener('touchstart', function(e) {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+}, {passive: true});
+
 document.addEventListener('touchend', function(e) {
+  // If user scrolled more than 8px vertically, don't trigger tap
+  var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+  var dx = Math.abs(e.changedTouches[0].clientX - touchStartX);
+  if (dy > 8 || dx > 8) return;
+
   var el = e.target;
   for (var i = 0; i < 8; i++) {
     if (!el || el === document.body) break;
