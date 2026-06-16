@@ -758,10 +758,10 @@ function load() {
     baseA = (baseA + rb.aa) * rb.am * G.pm * (G.autoB || 1) * shopB('ab');
     var offM = G.psOwn['o2x'] ? 2 : 1;
     var gained = baseA * Math.min(el, 72 * 3600) * offM;
-    if (gained > 0) { G.e += gained; G.te += gained; }
-    document.getElementById('offTime').textContent = fmtT(el);
-    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS';
-    document.getElementById('offModal').style.display = 'flex';
+    G.e += gained; G.te += gained;
+    document.getElementById('offTime').textContent = fmtT(Math.max(0,el));
+    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (Buy Auto-Upgrades!)' : '');
+    if (el > 2) document.getElementById('offModal').style.display = 'flex';
     chkDailyReset();
     chkLoginDay();
     applyTheme(G.curTheme || '');
@@ -1547,10 +1547,25 @@ function tick() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-setInterval(save, 10000);
-document.addEventListener('visibilitychange', save);
+setInterval(save, 5000);
+// Extra: update lastSeen every 30s even without full save
+setInterval(function() {
+  try { 
+    var raw = localStorage.getItem(SK);
+    if (raw) {
+      var s = JSON.parse(raw);
+      s.ls = Date.now();
+      localStorage.setItem(SK, JSON.stringify(s));
+    }
+  } catch(e) {}
+}, 30000);
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') save();
+});
 window.addEventListener('pagehide', save);
 window.addEventListener('beforeunload', save);
+// iOS specific: save when user switches app
+window.addEventListener('blur', save);
 
 load();
 updateCore();
