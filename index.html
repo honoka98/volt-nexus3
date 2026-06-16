@@ -354,6 +354,13 @@ body{
 </div>
 
 <div class="wrap">
+  <!-- DEBUG BAR - shows save status -->
+  <div id="debugBar" style="background:#060f1e;border:1px solid rgba(0,245,255,0.2);border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:9px;color:#4a6a8a;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;">
+    <span id="debugSave">SAVE: never</span>
+    <span id="debugAps">APS: 0</span>
+    <span id="debugBalance">BAL: 0</span>
+  </div>
+
   <div class="hdr">
     <h1>VOLT NEXUS</h1>
     <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v8.0</div>
@@ -479,7 +486,7 @@ body{
 
 <script>
 // ── SAVE KEY ─────────────────────────────────────────────────────────────────
-var SK = 'vnx8';
+var SK = 'vnx9';
 
 // ── INFINITE LEVELS ───────────────────────────────────────────────────────────
 var LT = ['RECRUIT','OPERATOR','SPECIALIST','COMMANDER','WARLORD','CYBER-LORD',
@@ -737,8 +744,16 @@ function streakMult() {
 function save() {
   try {
     G.ls = Date.now();
-    localStorage.setItem(SK, JSON.stringify(G));
-  } catch(e) {}
+    var data = JSON.stringify(G);
+    localStorage.setItem(SK, data);
+    // Verify it was actually saved
+    var check = localStorage.getItem(SK);
+    var ds = document.getElementById('debugSave');
+    if (ds) ds.textContent = check ? 'SAVED ✓ ' + new Date().toLocaleTimeString() : 'SAVE FAILED!';
+  } catch(e) {
+    var ds = document.getElementById('debugSave');
+    if (ds) ds.textContent = 'SAVE ERROR: ' + e.message;
+  }
 }
 
 // ── LOAD ─────────────────────────────────────────────────────────────────────
@@ -805,7 +820,7 @@ function load() {
     var el3 = document.getElementById('offBalance');
     if (el1) el1.textContent = fmtT(Math.max(0, elapsed));
     if (el2) el2.textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (need Auto-Upgrades!)' : '');
-    if (el3) el3.textContent = 'Balance: ' + fmt(G.e - gained) + ' → ' + fmt(G.e);
+    if (el3) el3.textContent = 'APS=' + aps.toFixed(2) + ' | ' + Math.floor(offlineSecs) + 's | ' + fmt(G.e - gained) + '→' + fmt(G.e);
     document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
@@ -1281,6 +1296,13 @@ var lastRender = 0;
 function render() {
   var now = Date.now(); if (now - lastRender < 150) return; lastRender = now;
   var a = calcAPS();
+  // Update debug bar
+  var ds = document.getElementById('debugSave');
+  var da = document.getElementById('debugAps');
+  var db = document.getElementById('debugBalance');
+  if (ds && G.ls) ds.textContent = 'SAVED: ' + Math.floor((Date.now()-G.ls)/1000) + 's ago';
+  if (da) da.textContent = 'APS: ' + a.toFixed(1);
+  if (db) db.textContent = 'BAL: ' + fmt(G.e);
   document.getElementById('eVal').textContent = fmt(G.e);
   document.getElementById('ePs').textContent = '+' + a.toFixed(1) + ' / sec (AUTO)';
   document.getElementById('corePow').textContent = '+' + fmt(calcCP()) + ' / tap';
@@ -1602,7 +1624,7 @@ function tick() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
-setInterval(save, 5000);
+setInterval(save, 3000);
 // Extra: update lastSeen every 30s even without full save
 // (removed buggy ls-only save)
 document.addEventListener('visibilitychange', function() {
@@ -1614,6 +1636,7 @@ window.addEventListener('beforeunload', save);
 window.addEventListener('blur', save);
 
 load();
+save(); // immediate save after load
 updateCore();
 chkPMilestones();
 renderLoginStrip();
