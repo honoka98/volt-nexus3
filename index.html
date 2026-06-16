@@ -430,33 +430,33 @@ function lvlName(n) {
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 var UPGRADES = [
-  // ── TIER 1 — Starter ──────────────────────────────────────────────────────
-  {id:'tap1', n:'QUANTUM TAP',       ic:'👆', ds:'Boosts tap power',             bc:15,         cm:1.6, ml:20, ef:'c', v:1,      lb:'+1/tap'},
-  {id:'bot1', n:'NANO-BOT MK1',      ic:'🤖', ds:'Auto-collects energy',          bc:50,         cm:1.7, ml:15, ef:'a', v:0.5,    lb:'+0.5/s'},
-  {id:'solar',n:'SOLAR ARRAY',       ic:'☀️', ds:'Passive generation',             bc:200,        cm:1.8, ml:10, ef:'a', v:2,      lb:'+2/s'},
-  {id:'plasma',n:'PLASMA CORE',      ic:'🔮', ds:'Supercharges taps',              bc:500,        cm:2.0, ml:10, ef:'c', v:5,      lb:'+5/tap'},
-  // ── TIER 2 — Advanced ─────────────────────────────────────────────────────
-  {id:'ai',   n:'AI HARVESTER',      ic:'🧠', ds:'Neural net mines energy',        bc:1500,       cm:1.9, ml:10, ef:'a', v:10,     lb:'+10/s'},
-  {id:'dark', n:'DARK MATTER RIG',   ic:'🌀', ds:'Bends space for energy',         bc:5000,       cm:2.2, ml:8,  ef:'a', v:35,     lb:'+35/s'},
-  {id:'void', n:'VOID TAP GLOVE',    ic:'⚔️', ds:'Hits parallel realities',        bc:10000,      cm:2.5, ml:5,  ef:'c', v:50,     lb:'+50/tap'},
-  {id:'qc',   n:'QUANTUM COMPUTER',  ic:'💻', ds:'Runs infinite simulations',      bc:25000,      cm:2.3, ml:8,  ef:'a', v:100,    lb:'+100/s'},
-  // ── TIER 3 — Elite ────────────────────────────────────────────────────────
-  {id:'worm', n:'WORMHOLE TAP',      ic:'🌌', ds:'Steals from other worlds',       bc:80000,      cm:2.8, ml:5,  ef:'c', v:200,    lb:'+200/tap'},
-  {id:'dyson',n:'DYSON SPHERE',      ic:'🌟', ds:'Harvests an entire star',        bc:500000,     cm:3.0, ml:5,  ef:'a', v:500,    lb:'+500/s'},
-  {id:'neuro',n:'NEURO-LINK GLOVE',  ic:'🧤', ds:'Brain-to-core tap interface',    bc:1500000,    cm:3.1, ml:5,  ef:'c', v:1000,   lb:'+1K/tap'},
-  {id:'pulsar',n:'PULSAR ARRAY',     ic:'💫', ds:'Pulsar beams power your core',   bc:5000000,    cm:3.2, ml:5,  ef:'a', v:2000,   lb:'+2K/s'},
-  // ── TIER 4 — Legendary ────────────────────────────────────────────────────
-  {id:'blackh',n:'BLACK HOLE ENGINE',ic:'⚫', ds:'Sucks in energy from the void',  bc:20000000,   cm:3.4, ml:4,  ef:'a', v:8000,   lb:'+8K/s'},
-  {id:'mshift',n:'MIND SHIFT TAP',   ic:'🌀', ds:'Taps across 10 dimensions',      bc:80000000,   cm:3.6, ml:4,  ef:'c', v:15000,  lb:'+15K/tap'},
-  {id:'galnet',n:'GALACTIC NETWORK', ic:'🌐', ds:'Connects galaxies for power',    bc:300000000,  cm:3.8, ml:4,  ef:'a', v:50000,  lb:'+50K/s'},
-  // ── TIER 5 — Cosmic ───────────────────────────────────────────────────────
-  {id:'bigbang',n:'BIG BANG REACTOR', ic:'💥', ds:'Recreates the Big Bang daily',  bc:1000000000, cm:4.0, ml:3,  ef:'a', v:200000, lb:'+200K/s'},
-  {id:'godblow',n:'GOD STRIKE',       ic:'✊', ds:'One tap destroys a universe',   bc:5000000000, cm:4.2, ml:3,  ef:'c', v:500000, lb:'+500K/tap'},
-  {id:'omegacore',n:'OMEGA CORE',     ic:'♾️', ds:'The final energy source',       bc:25000000000,cm:4.5, ml:3,  ef:'a', v:2000000,lb:'+2M/s'},
-  // ── TIER 6 — Transcendent ─────────────────────────────────────────────────
-  {id:'timebend',n:'TIME BENDER',     ic:'⏳', ds:'Harvests energy from the past', bc:1e14,       cm:5.0, ml:2,  ef:'a', v:10000000,lb:'+10M/s'},
-  {id:'realitytap',n:'REALITY TAP',   ic:'🔱', ds:'Taps reality itself',           bc:1e16,       cm:5.5, ml:2,  ef:'c', v:50000000,lb:'+50M/tap'},
-  {id:'infinitysrc',n:'INFINITY SOURCE',ic:'🌈',ds:'Infinite energy unleashed',    bc:1e18,       cm:6.0, ml:1,  ef:'a', v:500000000,lb:'+500M/s'}
+  // ── TIER 1 — Starter (no cap, costs grow fast) ───────────────────────────
+  {id:'tap1', n:'QUANTUM TAP',        ic:'👆', ds:'Boosts tap power',              bc:15,         cm:1.8,  ef:'c', v:1,         lb:'+1/tap'},
+  {id:'bot1', n:'NANO-BOT MK1',       ic:'🤖', ds:'Auto-collects energy',           bc:50,         cm:1.85, ef:'a', v:0.5,       lb:'+0.5/s'},
+  {id:'solar',n:'SOLAR ARRAY',        ic:'☀️', ds:'Passive generation',              bc:200,        cm:1.9,  ef:'a', v:2,         lb:'+2/s'},
+  {id:'plasma',n:'PLASMA CORE',       ic:'🔮', ds:'Supercharges taps',               bc:500,        cm:1.95, ef:'c', v:5,         lb:'+5/tap'},
+  // ── TIER 2 — Advanced ────────────────────────────────────────────────────
+  {id:'ai',   n:'AI HARVESTER',       ic:'🧠', ds:'Neural net mines energy',         bc:1500,       cm:2.0,  ef:'a', v:10,        lb:'+10/s'},
+  {id:'dark', n:'DARK MATTER RIG',    ic:'🌀', ds:'Bends space for energy',          bc:5000,       cm:2.1,  ef:'a', v:35,        lb:'+35/s'},
+  {id:'void', n:'VOID TAP GLOVE',     ic:'⚔️', ds:'Hits parallel realities',         bc:10000,      cm:2.2,  ef:'c', v:50,        lb:'+50/tap'},
+  {id:'qc',   n:'QUANTUM COMPUTER',   ic:'💻', ds:'Runs infinite simulations',       bc:25000,      cm:2.2,  ef:'a', v:100,       lb:'+100/s'},
+  // ── TIER 3 — Elite ───────────────────────────────────────────────────────
+  {id:'worm', n:'WORMHOLE TAP',       ic:'🌌', ds:'Steals from other worlds',        bc:80000,      cm:2.3,  ef:'c', v:200,       lb:'+200/tap'},
+  {id:'dyson',n:'DYSON SPHERE',       ic:'🌟', ds:'Harvests an entire star',         bc:500000,     cm:2.4,  ef:'a', v:500,       lb:'+500/s'},
+  {id:'neuro',n:'NEURO-LINK GLOVE',   ic:'🧤', ds:'Brain-to-core tap interface',     bc:1500000,    cm:2.5,  ef:'c', v:1000,      lb:'+1K/tap'},
+  {id:'pulsar',n:'PULSAR ARRAY',      ic:'💫', ds:'Pulsar beams power your core',    bc:5000000,    cm:2.6,  ef:'a', v:2000,      lb:'+2K/s'},
+  // ── TIER 4 — Legendary ───────────────────────────────────────────────────
+  {id:'blackh',n:'BLACK HOLE ENGINE', ic:'⚫', ds:'Sucks in energy from the void',   bc:20000000,   cm:2.7,  ef:'a', v:8000,      lb:'+8K/s'},
+  {id:'mshift',n:'MIND SHIFT TAP',    ic:'🌀', ds:'Taps across 10 dimensions',       bc:80000000,   cm:2.8,  ef:'c', v:15000,     lb:'+15K/tap'},
+  {id:'galnet',n:'GALACTIC NETWORK',  ic:'🌐', ds:'Connects galaxies for power',     bc:300000000,  cm:2.9,  ef:'a', v:50000,     lb:'+50K/s'},
+  // ── TIER 5 — Cosmic ──────────────────────────────────────────────────────
+  {id:'bigbang',n:'BIG BANG REACTOR', ic:'💥', ds:'Recreates the Big Bang daily',    bc:1e9,        cm:3.0,  ef:'a', v:200000,    lb:'+200K/s'},
+  {id:'godblow',n:'GOD STRIKE',       ic:'✊', ds:'One tap destroys a universe',     bc:5e9,        cm:3.1,  ef:'c', v:500000,    lb:'+500K/tap'},
+  {id:'omegacore',n:'OMEGA CORE',     ic:'♾️', ds:'The final energy source',         bc:25e9,       cm:3.2,  ef:'a', v:2000000,   lb:'+2M/s'},
+  // ── TIER 6 — Transcendent ────────────────────────────────────────────────
+  {id:'timebend',n:'TIME BENDER',     ic:'⏳', ds:'Harvests energy from the past',   bc:1e14,       cm:3.4,  ef:'a', v:10000000,  lb:'+10M/s'},
+  {id:'realitytap',n:'REALITY TAP',   ic:'🔱', ds:'Taps reality itself',             bc:1e16,       cm:3.6,  ef:'c', v:50000000,  lb:'+50M/tap'},
+  {id:'infinitysrc',n:'INFINITY SOURCE',ic:'🌈',ds:'Infinite energy unleashed',      bc:1e18,       cm:3.8,  ef:'a', v:500000000, lb:'+500M/s'}
 ];
 var SYNERGIES = [
   {ids:['solar','ai'],       n:'SOLAR MIND',      bonus:'Auto ×1.5',  t:'a',  m:1.5},
@@ -619,7 +619,18 @@ function calcCP() {
 function upgCost(id) {
   var u = null;
   for (var i = 0; i < UPGRADES.length; i++) { if (UPGRADES[i].id === id) { u = UPGRADES[i]; break; } }
-  return Math.floor(u.bc * Math.pow(u.cm, G.upg[id] || 0) / G.pm);
+  var lv = G.upg[id] || 0;
+  return Math.floor(u.bc * Math.pow(u.cm, lv) / G.pm);
+}
+function upgCostNext(id, qty) {
+  // Total cost to buy qty more levels
+  var u = null;
+  for (var i = 0; i < UPGRADES.length; i++) { if (UPGRADES[i].id === id) { u = UPGRADES[i]; break; } }
+  var lv = G.upg[id] || 0, total = 0;
+  for (var i = 0; i < qty; i++) {
+    total += Math.floor(u.bc * Math.pow(u.cm, lv + i) / G.pm);
+  }
+  return total;
 }
 function streakMult() {
   if (G.streak >= 50) return 5;
@@ -838,16 +849,14 @@ function buyUpg(id, qty) {
   if (!upg) return;
   var bought = 0;
   for (var i = 0; i < qty; i++) {
-    var lv = G.upg[id] || 0; if (lv >= upg.ml) break;
     var cost = upgCost(id); if (G.e < cost) break;
-    G.e -= cost; G.upg[id] = lv + 1; G.dUpg++; G.totUpg++; bought++;
+    G.e -= cost; G.upg[id] = (G.upg[id] || 0) + 1; G.dUpg++; G.totUpg++; bought++;
   }
   if (bought > 0) { playUpg(); notif('✓ ' + upg.n + ' LVL ' + G.upg[id]); chkMissions(); chkAchievements(); renderUpgrades(); renderSynergies(); }
 }
 function buyMax(id) {
-  var upg = null;
-  for (var i = 0; i < UPGRADES.length; i++) { if (UPGRADES[i].id === id) { upg = UPGRADES[i]; break; } }
-  if (upg) buyUpg(id, upg.ml - (G.upg[id] || 0));
+  // Buy as many as affordable up to 100 at once
+  buyUpg(id, 100);
 }
 
 // ── PRESTIGE ──────────────────────────────────────────────────────────────────
@@ -1062,38 +1071,40 @@ function renderClaimBtn() {
   else { btn.textContent = '🎁 CLAIM DAILY REWARD'; btn.className = 'claim-btn'; }
 }
 function renderUpgrades() {
-  function synMax(id) {
-    var upg = null;
-    for (var k=0;k<UPGRADES.length;k++) if(UPGRADES[k].id===id){upg=UPGRADES[k];break;}
-    return upg && (G.upg[id]||0) >= upg.ml;
+  function synActive(id) {
+    for (var j=0;j<SYNERGIES.length;j++) {
+      var s=SYNERGIES[j]; var inSyn=false;
+      for (var k=0;k<s.ids.length;k++) if(s.ids[k]===id){inSyn=true;break;}
+      if (!inSyn) continue;
+      // synergy active if all members have at least 1 level
+      var allHave=true;
+      for (var k=0;k<s.ids.length;k++) if(!(G.upg[s.ids[k]]||0)){allHave=false;break;}
+      if (allHave) return true;
+    }
+    return false;
   }
   var html = '';
   for (var i = 0; i < UPGRADES.length; i++) {
     var upg = UPGRADES[i], lv = G.upg[upg.id]||0, cost = upgCost(upg.id);
-    var can = G.e>=cost && lv<upg.ml, max = lv>=upg.ml;
-    var syn = false;
-    for (var j=0;j<SYNERGIES.length;j++) {
-      var s=SYNERGIES[j]; var inSyn=false;
-      for (var k=0;k<s.ids.length;k++) if(s.ids[k]===upg.id){inSyn=true;break;}
-      if (inSyn && s.ids.every(function(id){return synMax(id);})) {syn=true;break;}
-    }
-    html += '<div class="ucard'+(max?' max':syn?' syn':can?' can':'')+'" data-uid="'+upg.id+'">';
+    var can = G.e >= cost;
+    var syn = synActive(upg.id);
+    // Show next 10 cost for tooltip
+    var cost10 = upgCostNext(upg.id, 10);
+    html += '<div class="ucard'+(syn?' syn':can?' can':'')+'" data-uid="'+upg.id+'">';
     html += '<div class="uico">'+upg.ic+'</div>';
-    html += '<div class="uinf"><div class="unm">'+upg.n+(syn?' ⚡':'')+'</div><div class="uds">'+upg.ds+'</div><div class="ulv">LVL '+lv+'/'+upg.ml+'</div></div>';
-    html += '<div class="uright"><div class="ucs'+((!can&&!max)?' dim':'')+'">'+( max?'MAXED':fmt(cost))+'</div><div class="upr">'+upg.lb+'</div>';
-    if (!max) html += '<div class="ubbtns"><div class="ubb" data-uid="'+upg.id+'" data-qty="1">x1</div><div class="ubb" data-uid="'+upg.id+'" data-qty="10">x10</div><div class="ubb" data-uid="'+upg.id+'" data-qty="max">MAX</div></div>';
+    html += '<div class="uinf"><div class="unm">'+upg.n+(syn?' ⚡':'')+'</div><div class="uds">'+upg.ds+'</div><div class="ulv">LVL '+lv+' <span style="color:#4a6a8a;font-size:7px">∞ NO CAP</span></div></div>';
+    html += '<div class="uright"><div class="ucs'+(!can?' dim':'')+'">'+fmt(cost)+'</div><div class="upr">'+upg.lb+'</div>';
+    html += '<div class="ubbtns"><div class="ubb" data-uid="'+upg.id+'" data-qty="1">x1</div><div class="ubb" data-uid="'+upg.id+'" data-qty="10">x10</div><div class="ubb" data-uid="'+upg.id+'" data-qty="max">MAX$</div></div>';
     html += '</div></div>';
   }
   document.getElementById('ulist').innerHTML = html;
 }
 function renderSynergies() {
-  function synMax(id) {
-    var upg=null; for(var k=0;k<UPGRADES.length;k++) if(UPGRADES[k].id===id){upg=UPGRADES[k];break;}
-    return upg && (G.upg[id]||0) >= upg.ml;
-  }
+  function synHas(id) { return (G.upg[id]||0) >= 1; }
   var html = '';
   for (var i=0;i<SYNERGIES.length;i++) {
-    var s=SYNERGIES[i], active=s.ids.every(function(id){return synMax(id);});
+    var s=SYNERGIES[i], active=true;
+    for (var k=0;k<s.ids.length;k++) if(!synHas(s.ids[k])){active=false;break;}
     var names = [];
     for (var j=0;j<s.ids.length;j++) { for(var k=0;k<UPGRADES.length;k++){if(UPGRADES[k].id===s.ids[j]){names.push(UPGRADES[k].n);break;}}}
     html += '<div class="syncard'+(active?' active':'')+'"><div class="synico">'+(active?'⚡':'🔗')+'</div><div class="syninf"><div class="synnm">'+s.n+'</div><div class="synds">'+names.join(' + ')+' → '+s.bonus+'</div></div><div class="synst">'+(active?'ACTIVE':'LOCKED')+'</div></div>';
