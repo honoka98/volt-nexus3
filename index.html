@@ -287,7 +287,8 @@ body{
     <div class="mdl-big" id="offTime">0s</div>
     <div class="mdl-lbl">ROBOTS COLLECTED</div>
     <div class="mdl-cred" id="offCred">+0 CREDITS</div>
-    <div class="mdl-btn" id="offBtn">⚡ COLLECT &amp; CONTINUE</div>
+    <div id="offBalance" style="font-size:9px;color:#4a6a8a;margin-bottom:8px;letter-spacing:1px"></div>
+    <div class="mdl-btn" id="offBtn" onclick="collectOffline()">⚡ COLLECT &amp; CONTINUE</div>
   </div>
 </div>
 
@@ -765,7 +766,10 @@ function load() {
     pendingOfflineCredits = gained;
 
     document.getElementById('offTime').textContent = fmtT(Math.max(0, el));
-    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' — Buy Auto-Upgrades for passive income!' : '');
+    document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' — Buy Auto-Upgrades!' : '');
+    // Show current balance so user can verify
+    var balEl = document.getElementById('offBalance');
+    if (balEl) balEl.textContent = 'Current balance: ' + fmt(G.e) + ' → ' + fmt(G.e + gained);
     document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
@@ -775,13 +779,13 @@ function load() {
 }
 
 function collectOffline() {
-  // Credit the pending offline earnings NOW and save immediately
-  G.e += pendingOfflineCredits;
-  G.te += pendingOfflineCredits;
+  var collected = pendingOfflineCredits;
+  G.e = (G.e || 0) + collected;
+  G.te = (G.te || 0) + collected;
   pendingOfflineCredits = 0;
   document.getElementById('offModal').style.display = 'none';
-  save(); // Save immediately so credits are never lost
-  notif('⚡ +' + fmt(G.e) + ' CREDITS COLLECTED!', '#00ff88');
+  save();
+  if (collected > 0) notif('⚡ +' + fmt(collected) + ' CREDITS ADDED!', '#00ff88');
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
