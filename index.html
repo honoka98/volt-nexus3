@@ -20,6 +20,7 @@ html,body{
   -webkit-touch-callout:none;
   -webkit-user-select:none;
   user-select:none;
+  touch-action:pan-y;
 }
 body{
   background-image:
@@ -62,7 +63,7 @@ body{
 .orbit-ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(0,245,255,0.12);pointer-events:none;animation:spinCW 10s linear infinite;}
 @keyframes spinCW{to{transform:rotate(360deg)}}
 .orbit-bots{position:absolute;inset:0;pointer-events:none;}
-.core-btn{
+.core-btn{touch-action:manipulation;
   width:155px;height:155px;border-radius:50%;
   border:2px solid #00f5ff;
   background:radial-gradient(circle at 40% 35%,#0a2a4a,#020813);
@@ -966,7 +967,7 @@ function drawChart() {
 // ── RENDER ────────────────────────────────────────────────────────────────────
 var lastRender = 0;
 function render() {
-  var now = Date.now(); if (now - lastRender < 80) return; lastRender = now;
+  var now = Date.now(); if (now - lastRender < 150) return; lastRender = now;
   var a = calcAPS();
   document.getElementById('eVal').textContent = fmt(G.e);
   document.getElementById('ePs').textContent = '+' + a.toFixed(1) + ' / sec (AUTO)';
@@ -1132,16 +1133,17 @@ function renderStats() {
 }
 
 // ── GLOBAL EVENT DELEGATION (works on iOS Safari) ────────────────────────────
-document.addEventListener('touchstart', function(e) {
+// Touch handler - passive so scrolling works, only fires on interactive elements
+document.addEventListener('touchend', function(e) {
   var el = e.target;
   for (var i = 0; i < 8; i++) {
     if (!el || el === document.body) break;
-    var id = el.id, cls = el.className || '';
+    var id = el.id, cls = (el.className || '').toString();
 
-    if (id === 'coreBtn' || el.closest && el.closest('#coreBtn')) { handleTap(e); return; }
+    if (id === 'coreBtn' || (el.closest && el.closest('#coreBtn'))) { handleTap(e); e.preventDefault(); return; }
     if (id === 'offBtn') { document.getElementById('offModal').style.display='none'; e.preventDefault(); return; }
     if (id === 'boostBtn') { activateBoost(); e.preventDefault(); return; }
-    if (id === 'claimBtn') { claimLogin(); e.preventDefault(); return; }
+    if (id === 'claimBtn' && cls.indexOf('claimed') === -1) { claimLogin(); e.preventDefault(); return; }
     if (id === 'pbtn' && !el.classList.contains('lk')) { startPrestige(); e.preventDefault(); return; }
     if (id === 'sndBtn') { G.snd=!G.snd; el.textContent=G.snd?'🔊':'🔇'; e.preventDefault(); return; }
     if (id === 'statsBtn') { showTab('stats'); e.preventDefault(); return; }
@@ -1149,29 +1151,27 @@ document.addEventListener('touchstart', function(e) {
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
     if (id === 'pathAuto')   { choosePath('auto');   e.preventDefault(); return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); e.preventDefault(); return; }
-
-    if (cls.indexOf('tab') !== -1 && id) { var t=id.replace('t-',''); if(t) showTab(t); e.preventDefault(); return; }
-    if (cls.indexOf('ucard') !== -1 || cls.indexOf('uinf') !== -1 || cls.indexOf('unm') !== -1) {
-      var uid = el.getAttribute('data-uid') || (el.closest && el.closest('[data-uid]') && el.closest('[data-uid]').getAttribute('data-uid'));
-      if (uid) { buyUpg(uid, 1); e.preventDefault(); return; }
-    }
+    if (cls.indexOf('tab') !== -1 && id && id.indexOf('t-') === 0) { showTab(id.replace('t-','')); e.preventDefault(); return; }
     if (cls.indexOf('ubb') !== -1) {
-      var uid = el.getAttribute('data-uid'), qty = el.getAttribute('data-qty');
-      if (uid) { if(qty==='max') buyMax(uid); else buyUpg(uid, parseInt(qty)||1); e.preventDefault(); return; }
+      var uid2 = el.getAttribute('data-uid'), qty = el.getAttribute('data-qty');
+      if (uid2) { if(qty==='max') buyMax(uid2); else buyUpg(uid2, parseInt(qty)||1); e.preventDefault(); return; }
     }
-    if (cls.indexOf('pu') !== -1) {
-      var pid = el.getAttribute('data-pu') || (el.closest && el.closest('[data-pu]') && el.closest('[data-pu]').getAttribute('data-pu'));
-      if (pid) { buyPu(pid); e.preventDefault(); return; }
+    if (cls.indexOf('ucard') !== -1 || cls.indexOf('uinf') !== -1 || cls.indexOf('unm') !== -1 || cls.indexOf('uico') !== -1) {
+      var card = el.closest ? el.closest('[data-uid]') : null;
+      if (card) { buyUpg(card.getAttribute('data-uid'), 1); e.preventDefault(); return; }
     }
-    if (cls.indexOf('pscard') !== -1) {
-      var psid = el.getAttribute('data-psid') || (el.closest && el.closest('[data-psid]') && el.closest('[data-psid]').getAttribute('data-psid'));
-      if (psid) { buyPs(psid); e.preventDefault(); return; }
+    if (cls.indexOf('pu') !== -1 && cls.indexOf('pu-') === -1) {
+      var card2 = el.closest ? el.closest('[data-pu]') : null;
+      if (card2) { buyPu(card2.getAttribute('data-pu')); e.preventDefault(); return; }
+    }
+    if (cls.indexOf('pscard') !== -1 || cls.indexOf('psinf') !== -1 || cls.indexOf('psico') !== -1) {
+      var card3 = el.closest ? el.closest('[data-psid]') : null;
+      if (card3) { buyPs(card3.getAttribute('data-psid')); e.preventDefault(); return; }
     }
     if (cls.indexOf('thbtn') !== -1) {
-      var th = el.getAttribute('data-theme'); if(th !== null) { setTheme(th); e.preventDefault(); return; }
+      var th = el.getAttribute('data-theme');
+      if (th !== null) { setTheme(th); e.preventDefault(); return; }
     }
-    if (cls.indexOf('claim-btn') !== -1 && cls.indexOf('claimed') === -1) { claimLogin(); e.preventDefault(); return; }
-
     el = el.parentElement;
   }
 }, {passive: false});
@@ -1234,7 +1234,7 @@ function tick() {
   if (G.sTimer>0) G.sTimer-=dt; else G.streak=Math.max(0,G.streak-Math.ceil(dt));
   chkRobots(); chkMissions(); chkAchievements(); recordAps();
   render();
-  requestAnimationFrame(tick);
+  setTimeout(tick, 100);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1250,7 +1250,7 @@ renderClaimBtn();
 render();
 renderUpgrades();
 renderSynergies();
-requestAnimationFrame(tick);
+setTimeout(tick, 100);
 </script>
 </body>
 </html>
