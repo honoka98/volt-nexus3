@@ -762,14 +762,19 @@ function load() {
     var offM = G.psOwn['o2x'] ? 2 : 1;
     var gained = Math.floor(baseA * Math.min(el, 72 * 3600) * offM);
 
-    // Store as pending — only credit when user taps COLLECT
+    // Add offline credits IMMEDIATELY to G so they're never lost
+    G.e += gained;
+    G.te += gained;
     pendingOfflineCredits = gained;
+
+    // Save right away with the new balance
+    G.ls = Date.now();
+    try { localStorage.setItem(SK, JSON.stringify(G)); } catch(ee) {}
 
     document.getElementById('offTime').textContent = fmtT(Math.max(0, el));
     document.getElementById('offCred').textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' — Buy Auto-Upgrades!' : '');
-    // Show current balance so user can verify
     var balEl = document.getElementById('offBalance');
-    if (balEl) balEl.textContent = 'Current balance: ' + fmt(G.e) + ' → ' + fmt(G.e + gained);
+    if (balEl) balEl.textContent = 'New balance after collect: ' + fmt(G.e);
     document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
@@ -780,12 +785,12 @@ function load() {
 
 function collectOffline() {
   var collected = pendingOfflineCredits;
-  G.e = (G.e || 0) + collected;
-  G.te = (G.te || 0) + collected;
   pendingOfflineCredits = 0;
   document.getElementById('offModal').style.display = 'none';
-  save();
-  if (collected > 0) notif('⚡ +' + fmt(collected) + ' CREDITS ADDED!', '#00ff88');
+  // Credits already added in load() and saved - just confirm to user
+  if (collected > 0) {
+    notif('⚡ +' + fmt(collected) + ' CREDITS COLLECTED!', '#00ff88');
+  }
 }
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
