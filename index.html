@@ -280,6 +280,22 @@ body{
 </head>
 <body>
 
+<!-- Save lastSeen immediately when page starts loading -->
+<script>
+try {
+  var _sk = 'vnx9';
+  var _raw = localStorage.getItem(_sk);
+  if (_raw) {
+    var _s = JSON.parse(_raw);
+    // If saved ls is older than the separate _ls key, keep the older one
+    var _sepLs = parseInt(localStorage.getItem(_sk+'_ls')||'0');
+    if (_sepLs && _sepLs < (_s.ls||Date.now())) {
+      _s.ls = _sepLs;
+      localStorage.setItem(_sk, JSON.stringify(_s));
+    }
+  }
+} catch(e) {}
+</script>
 <div id="notif"></div>
 
 <!-- OFFLINE MODAL -->
@@ -749,7 +765,7 @@ function save() {
     G.ls = Date.now();
     var data = JSON.stringify(G);
     localStorage.setItem(SK, data);
-    // Verify it was actually saved
+    localStorage.setItem(SK + '_ls', G.ls.toString());
     var check = localStorage.getItem(SK);
     var ds = document.getElementById('debugSave');
     if (ds) ds.textContent = check ? 'SAVED ✓ ' + new Date().toLocaleTimeString() : 'SAVE FAILED!';
@@ -769,8 +785,14 @@ function load() {
 
     // How long was the game closed?
     var now = Date.now();
-    var lastSeen = s.ls || now;
+    // Check both the save timestamp AND the separate lastSeen timestamp
+    // Use whichever is OLDER (longer ago = more offline time)
+    var lastSeenSave = s.ls || now;
+    var lastSeenSep = parseInt(localStorage.getItem(SK + '_ls') || '0') || now;
+    var lastSeen = Math.min(lastSeenSave, lastSeenSep); // oldest = most time passed
     var elapsed = (now - lastSeen) / 1000; // seconds
+    // Clear the separate lastSeen so it doesn't affect next load
+    try { localStorage.removeItem(SK + '_ls'); } catch(e) {}
 
     // Copy all saved values into G
     for (var key in s) {
@@ -1630,13 +1652,30 @@ function tick() {
 setInterval(save, 3000);
 // Extra: update lastSeen every 30s even without full save
 // (removed buggy ls-only save)
+// Save full state when hidden
 document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'hidden') save();
+  if (document.visibilityState === 'hidden') {
+    save();
+    // Also write lastSeen separately so it's never lost
+    try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
+  }
 });
-window.addEventListener('pagehide', save);
-window.addEventListener('beforeunload', save);
-// iOS specific: save when user switches app
-window.addEventListener('blur', save);
+window.addEventListener('pagehide', function() {
+  save();
+  try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
+});
+window.addEventListener('beforeunload', function() {
+  save();
+  try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
+});
+window.addEventListener('blur', function() {
+  save();
+  try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
+});
+// Write lastSeen every 10 seconds independently
+setInterval(function() {
+  try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
+}, 10000);
 
 load();
 save(); // immediate save after load
