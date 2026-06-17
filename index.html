@@ -304,7 +304,7 @@ try {
     <div class="mdl-h">⚡ WELCOME BACK</div>
     <div class="mdl-lbl">YOU WERE GONE FOR</div>
     <div class="mdl-big" id="offTime">0s</div>
-    <div class="mdl-lbl">ROBOTS COLLECTED</div>
+    <div class="mdl-lbl" id="offRobotLbl">ROBOTS COLLECTED</div>
     <div class="mdl-cred" id="offCred">+0 CREDITS</div>
     <div id="offBalance" style="font-size:9px;color:#4a6a8a;margin-bottom:8px;letter-spacing:1px"></div>
     <div class="mdl-btn" id="offBtn" onclick="collectOffline()">⚡ COLLECT &amp; CONTINUE</div>
@@ -816,8 +816,13 @@ function load() {
         if (r.bt === 'am') robotAutoMult *= r.bv;
       }
     }
-    aps = (aps + robotAutoAdd) * robotAutoMult;
+    // Robots work extra hard while you're away (1.5x robot contribution offline)
+    var robotOfflineBonus = 1.5;
+    aps = (aps + robotAutoAdd * robotOfflineBonus) * robotAutoMult;
     aps *= (G.pm || 1) * (G.autoB || 1);
+    // Count active robots for display
+    window.OFFLINE_ROBOTCOUNT = 0;
+    for (var i = 0; i < ROBOTS.length; i++) { if (G.robots[ROBOTS[i].id]) window.OFFLINE_ROBOTCOUNT++; }
     // Apply prestige shop auto bonus
     var abShop = 1;
     for (var i = 0; i < PSHOP.length; i++) {
@@ -829,15 +834,45 @@ function load() {
     // Cap offline time at 72 hours
     var offlineSecs = Math.min(elapsed, 72 * 3600);
 
-    // Use the player's REAL recorded earning rate (taps + auto combined)
-    // This matches exactly what they earn while actively playing.
-    // Fall back to auto-only rate if no real rate recorded yet.
-    var realRate = G.realRate || G.peakRate || aps;
-    // Use the higher of: real recorded rate, or pure auto rate
-    var offlineRate = Math.max(realRate, aps);
+    // Calculate FULL active earning rate directly from current stats.
+    // Tap power per single tap (at max combo, with avg crit):
+    var tapPow = 1;
+    for (var i = 0; i < UPGRADES.length; i++) {
+      if (UPGRADES[i].ef === 'c') tapPow += UPGRADES[i].v * (G.upg[UPGRADES[i].id] || 0);
+    }
+    var rTapAdd = 0, rTapMult = 1;
+    for (var i = 0; i < ROBOTS.length; i++) {
+      var r = ROBOTS[i];
+      if (G.robots[r.id]) {
+        if (r.bt === 'c')  rTapAdd  += r.bv;
+        if (r.bt === 'tm') rTapMult *= r.bv;
+      }
+    }
+    tapPow = (tapPow + rTapAdd) * rTapMult * (G.pm || 1) * (G.tapB || 1);
+    var tbS = 1;
+    for (var i = 0; i < PSHOP.length; i++) {
+      if (G.psOwn[PSHOP[i].id] && PSHOP[i].t === 'tb') tbS += PSHOP[i].v;
+    }
+    tapPow *= tbS;
+    // Max combo multiplier
+    var maxCombo = (G.psOwn['cm'] ? 20 : 10) * (G.comboB || 1);
+    // Average crit multiplier
+    var critCh = 0.1 * (G.critB || 1); if (critCh > 0.5) critCh = 0.5;
+    var critMx = (G.critB >= 2) ? 30 : 15;
+    var avgCrit = 1 + critCh * ((5 + critMx) / 2) * (G.critB || 1);
+    // 8 taps per second of active play
+    var tapsPerSec = 8;
+    var activeTapRate = tapPow * maxCombo * avgCrit * tapsPerSec;
+
+    // Full active rate = tap income + auto income
+    var fullActiveRate = activeTapRate + aps;
+    // Also never go below the tracked real rate
+    var trackedRate = G.realRate || G.peakRate || 0;
+    var offlineRate = Math.max(fullActiveRate, trackedRate, aps);
 
     var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
     var gained = Math.floor(offlineRate * offlineSecs * baseOffline);
+    window.OFFLINE_RATE = offlineRate;
     window.OFFLINE_TIMEBONUS = 'FULL ACTIVE';
 
     // Store as pending - will be added when user taps COLLECT
@@ -850,9 +885,11 @@ function load() {
     var el1 = document.getElementById('offTime');
     var el2 = document.getElementById('offCred');
     var el3 = document.getElementById('offBalance');
+    var elR = document.getElementById('offRobotLbl');
+    if (elR) elR.textContent = (window.OFFLINE_ROBOTCOUNT || 0) + ' ROBOTS WORKED HARD';
     if (el1) el1.textContent = fmtT(Math.max(0, elapsed));
     if (el2) el2.textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (need Auto-Upgrades!)' : '');
-    if (el3) el3.textContent = '⚡ FULL ACTIVE RATE! → ' + fmt(G.e) + ' + ' + fmt(gained) + ' = ' + fmt(G.e + gained);
+    if (el3) el3.textContent = '⚡ ' + fmt(window.OFFLINE_RATE||0) + '/s × ' + Math.floor(offlineSecs) + 's → ' + fmt(G.e) + ' + ' + fmt(gained);
     if (gained > 0) document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
