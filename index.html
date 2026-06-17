@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VOLT NEXUS v9.1</title>
+<title>VOLT NEXUS v9.2</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -435,7 +435,7 @@ body{
 <div class="wrap">
   <div class="hdr">
     <h1>VOLT NEXUS</h1>
-    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.1 — FIXED</div>
+    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.2 — FIXED</div>
   </div>
 
   <!-- Clean icon toolbar -->
@@ -950,7 +950,13 @@ function load() {
     var freshFlag = localStorage.getItem(SK + '_fresh');
     if (freshFlag) {
       localStorage.removeItem(SK + '_fresh');
-      // Start completely fresh - G is already at default values
+      // Explicitly reset ALL multipliers and progress to guarantee clean start
+      G.e = 0; G.te = 0; G.tc = 0; G.pc = 0; G.pm = 1;
+      G.upg = {}; G.lv = 1; G.xp = 0; G.combo = 1;
+      G.tapB = 1; G.autoB = 1; G.xpB = 1; G.critB = 1; G.comboB = 1;
+      G.robots = {}; G.psOwn = {}; G.ppts = 0;
+      G.prestigeMultBonus = 1; G.omegaMult = 1; G.omegaCount = 0;
+      G.realRate = 0; G.peakRate = 0;
       G.ls = Date.now();
       chkDailyReset();
       chkLoginDay();
@@ -1046,6 +1052,13 @@ function load() {
 
     var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
     var gained = Math.floor(offlineRate * offlineSecs * baseOffline);
+    // SAFETY: new players (low total earned) can't get huge offline windfalls.
+    // Offline gain is capped at what they could realistically have earned.
+    if (!isFinite(gained) || gained < 0) gained = 0;
+    // Cap offline gain at 2x the player's all-time earnings (prevents new-player exploit)
+    if (G.te > 0 && gained > G.te * 2) gained = Math.floor(G.te * 2);
+    // If player has earned almost nothing and no auto income, no offline gain
+    if (aps <= 0 && (G.realRate || 0) <= 0) gained = 0;
     window.OFFLINE_RATE = offlineRate;
     window.OFFLINE_TIMEBONUS = 'FULL ACTIVE';
 
