@@ -260,6 +260,33 @@ body{
 .run-date{font-size:7px;color:#4a6a8a;text-align:right;}
 .empty-runs{text-align:center;font-size:9px;color:#4a6a8a;padding:20px;letter-spacing:1px;}
 .name-edit{background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.2);border-radius:6px;color:#00f5ff;font-family:'Orbitron',monospace;font-size:12px;padding:4px 8px;text-align:center;width:140px;letter-spacing:1px;}
+/* MONTHLY PASS */
+.pass-banner{background:linear-gradient(135deg,#1a0030,#060f1e);border:1px solid rgba(180,0,255,0.3);border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;}
+.pass-banner-title{font-family:'Orbitron',monospace;font-size:13px;color:#b400ff;text-shadow:0 0 10px #b400ff;letter-spacing:2px;}
+.pass-banner-sub{font-size:8px;color:#4a6a8a;margin-top:5px;letter-spacing:.5px;line-height:1.4;}
+.pass-progress-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.pass-progress-bar{flex:1;height:6px;background:rgba(180,0,255,0.15);border-radius:3px;overflow:hidden;}
+.pass-progress-fill{height:100%;background:linear-gradient(90deg,#b400ff,#e080ff);border-radius:3px;transition:width .5s;width:0%;}
+.pass-progress-txt{font-family:'Orbitron',monospace;font-size:9px;color:#b400ff;min-width:64px;text-align:right;}
+.pass-claim-wrap{margin-bottom:12px;}
+.pass-claim-btn{width:100%;padding:13px;background:linear-gradient(135deg,#2a0050,#1a0030);border:1px solid rgba(180,0,255,0.5);border-radius:10px;color:#e080ff;font-family:'Orbitron',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;text-shadow:0 0 10px #b400ff;text-align:center;}
+.pass-claim-btn:active{transform:scale(.98);}
+.pass-claim-btn.done{opacity:0.4;pointer-events:none;background:#0a1628;color:#4a6a8a;text-shadow:none;border-color:rgba(100,100,100,0.3);}
+.pass-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px;}
+.pass-day{aspect-ratio:1;background:#0a1628;border:1px solid rgba(0,245,255,0.1);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;position:relative;}
+.pass-day.claimed{border-color:rgba(0,255,136,0.4);background:linear-gradient(135deg,#091a0f,#0a1628);}
+.pass-day.today{border-color:rgba(255,170,0,0.7);background:linear-gradient(135deg,#1a1000,#0a1628);animation:passGlow 1.5s ease-in-out infinite;}
+.pass-day.locked{opacity:0.45;}
+.pass-day.mega{border-color:rgba(255,215,0,0.6);}
+.pass-day.mega.today{animation:passGlowGold 1.2s ease-in-out infinite;}
+@keyframes passGlow{0%,100%{box-shadow:0 0 5px rgba(255,170,0,0.3)}50%{box-shadow:0 0 14px rgba(255,170,0,0.7)}}
+@keyframes passGlowGold{0%,100%{box-shadow:0 0 6px rgba(255,215,0,0.4)}50%{box-shadow:0 0 18px rgba(255,215,0,0.9)}}
+.pass-day-n{font-family:'Orbitron',monospace;font-size:6px;color:#4a6a8a;position:absolute;top:3px;left:4px;}
+.pass-day.today .pass-day-n,.pass-day.claimed .pass-day-n{color:#ffaa00;}
+.pass-day-ico{font-size:17px;}
+.pass-day-r{font-size:6px;color:#00ff88;margin-top:1px;font-family:'Orbitron',monospace;text-align:center;}
+.pass-day.locked .pass-day-r{color:#4a6a8a;}
+.pass-day-check{position:absolute;top:2px;right:3px;font-size:8px;color:#00ff88;}
 
 /* THEME */
 .throw{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
@@ -408,6 +435,7 @@ try {
   <!-- Clean icon toolbar -->
   <div class="toolbar">
     <div class="tool-btn" id="profileBtn"><span class="tool-ico">👤</span><span class="tool-lbl">PROFILE</span></div>
+    <div class="tool-btn" id="passBtn"><span class="tool-ico">🎫</span><span class="tool-lbl">PASS</span></div>
     <div class="tool-btn" id="statsBtn"><span class="tool-ico">📊</span><span class="tool-lbl">STATS</span></div>
     <div class="tool-btn" id="sndBtn"><span class="tool-ico">🔊</span><span class="tool-lbl">SOUND</span></div>
     <div class="tool-btn danger" id="resetBtn"><span class="tool-ico">🗑</span><span class="tool-lbl">RESET</span></div>
@@ -534,6 +562,21 @@ try {
     <div class="sec">CAREER STATS</div>
     <div class="stcard" id="careerStats"></div>
   </div>
+
+  <!-- MONTHLY PASS -->
+  <div id="p-pass" style="display:none">
+    <div class="sec">🎫 MONTHLY PASS — FREE</div>
+    <div class="pass-banner">
+      <div class="pass-banner-title">30-DAY REWARD CALENDAR</div>
+      <div class="pass-banner-sub">Claim one reward per day. Miss a day and the streak holds — just come back!</div>
+      <div class="pass-progress-row">
+        <div class="pass-progress-bar"><div class="pass-progress-fill" id="passProgFill"></div></div>
+        <div class="pass-progress-txt" id="passProgTxt">Day 0 / 30</div>
+      </div>
+    </div>
+    <div class="pass-claim-wrap" id="passClaimWrap"></div>
+    <div class="pass-grid" id="passGrid"></div>
+  </div>
 </div>
 
 <script>
@@ -605,14 +648,67 @@ var ROBOTS = [
   {id:'r9',n:'QUANTUM-Σ',e:'🧬',r:'legendary',bv:5,  bt:'tm',g:5000000}
 ];
 var MILESTONES = [
-  {ic:'⚡',n:'FIRST SPARK', g:10,      r:50},
-  {ic:'🔥',n:'IGNITION',    g:100,     r:200},
-  {ic:'💎',n:'CRYSTAL AGE', g:1000,    r:1000},
-  {ic:'🌐',n:'NETWORKED',   g:10000,   r:5000},
-  {ic:'🚀',n:'LAUNCHED',    g:100000,  r:20000},
-  {ic:'🌌',n:'COSMIC',      g:1000000, r:100000},
-  {ic:'♾️',n:'INFINITE',    g:1e7,     r:500000},
-  {ic:'⚫',n:'SINGULARITY', g:1e9,     r:5000000}
+  {ic:'⚡',n:'FIRST SPARK',  g:10,      r:50},
+  {ic:'🔥',n:'IGNITION',     g:100,     r:200},
+  {ic:'💎',n:'CRYSTAL AGE',  g:1000,    r:1000},
+  {ic:'🌐',n:'NETWORKED',    g:10000,   r:5000},
+  {ic:'🚀',n:'LAUNCHED',     g:100000,  r:20000},
+  {ic:'🌌',n:'COSMIC',       g:1000000, r:100000},
+  {ic:'♾️',n:'INFINITE',     g:1e7,     r:500000},
+  {ic:'⚫',n:'SINGULARITY',  g:1e9,     r:5000000},
+  {ic:'🌠',n:'STARBORN',     g:1e11,    r:5e7},
+  {ic:'🪐',n:'PLANETARY',    g:1e13,    r:5e8},
+  {ic:'☀️',n:'STELLAR LORD', g:1e15,    r:5e9},
+  {ic:'🌟',n:'GALACTIC',     g:1e17,    r:5e10},
+  {ic:'✨',n:'UNIVERSAL',    g:1e19,    r:5e11},
+  {ic:'🔱',n:'MULTIVERSE',   g:1e22,    r:5e12},
+  {ic:'👁️',n:'OMNISCIENT',   g:1e25,    r:5e13},
+  {ic:'🜲',n:'GODHOOD',      g:1e28,    r:5e14},
+  {ic:'⟁',n:'BEYOND ALL',   g:1e32,    r:5e15},
+  {ic:'🕳️',n:'THE END',      g:1e36,    r:5e16}
+];
+
+// ── SPECIAL ACHIEVEMENTS (non-credit based) ──────────────────────────────────
+var ACHIEVEMENTS = [
+  // Tap milestones
+  {id:'a_tap1',  ic:'👆', n:'TAPPER',         ds:'Tap 100 times',          type:'taps',  g:100,     r:1000},
+  {id:'a_tap2',  ic:'✊', n:'TAP MACHINE',     ds:'Tap 1,000 times',        type:'taps',  g:1000,    r:10000},
+  {id:'a_tap3',  ic:'💪', n:'TAP TITAN',       ds:'Tap 10,000 times',       type:'taps',  g:10000,   r:100000},
+  {id:'a_tap4',  ic:'🦾', n:'TAP GOD',         ds:'Tap 100,000 times',      type:'taps',  g:100000,  r:5e6},
+  {id:'a_tap5',  ic:'⚡', n:'MILLION TAPS',    ds:'Tap 1,000,000 times',    type:'taps',  g:1000000, r:1e9},
+  // Crit milestones
+  {id:'a_crit1', ic:'💥', n:'LUCKY HIT',       ds:'Land 50 critical hits',  type:'crits', g:50,      r:5000},
+  {id:'a_crit2', ic:'🎯', n:'CRIT MASTER',     ds:'Land 500 critical hits', type:'crits', g:500,     r:50000},
+  {id:'a_crit3', ic:'☄️', n:'CRIT STORM',      ds:'Land 5,000 crits',       type:'crits', g:5000,    r:5e6},
+  {id:'a_crit4', ic:'🌋', n:'CRIT OVERLORD',   ds:'Land 50,000 crits',      type:'crits', g:50000,   r:5e8},
+  // Level milestones
+  {id:'a_lv1',   ic:'⭐', n:'RISING STAR',     ds:'Reach level 25',         type:'level', g:25,      r:50000},
+  {id:'a_lv2',   ic:'🌟', n:'VETERAN',         ds:'Reach level 50',         type:'level', g:50,      r:500000},
+  {id:'a_lv3',   ic:'💫', n:'ELITE',           ds:'Reach level 100',        type:'level', g:100,     r:5e6},
+  {id:'a_lv4',   ic:'🔆', n:'LEGEND',          ds:'Reach level 200',        type:'level', g:200,     r:5e8},
+  {id:'a_lv5',   ic:'👑', n:'TRANSCENDENT',    ds:'Reach level 500',        type:'level', g:500,     r:5e11},
+  // Prestige milestones
+  {id:'a_pc1',   ic:'🌀', n:'REBORN',          ds:'Prestige 1 time',        type:'pc',    g:1,       r:10000},
+  {id:'a_pc2',   ic:'🔄', n:'CYCLE MASTER',    ds:'Prestige 10 times',      type:'pc',    g:10,      r:5e6},
+  {id:'a_pc3',   ic:'♻️', n:'ETERNAL CYCLE',   ds:'Prestige 50 times',      type:'pc',    g:50,      r:5e9},
+  {id:'a_pc4',   ic:'🌌', n:'INFINITY LOOP',   ds:'Prestige 100 times',     type:'pc',    g:100,     r:5e12},
+  // Omega milestones
+  {id:'a_om1',   ic:'☠', n:'OMEGA INITIATE',  ds:'Do 1 Omega Reset',       type:'omega', g:1,       r:1e8},
+  {id:'a_om2',   ic:'💀', n:'OMEGA MASTER',    ds:'Do 5 Omega Resets',      type:'omega', g:5,       r:1e12},
+  {id:'a_om3',   ic:'👹', n:'OMEGA GOD',       ds:'Do 10 Omega Resets',     type:'omega', g:10,      r:1e16},
+  // Robot milestones
+  {id:'a_rob1',  ic:'🤖', n:'COLLECTOR',       ds:'Unlock 3 robots',        type:'robots',g:3,       r:50000},
+  {id:'a_rob2',  ic:'🦿', n:'ROBOT ARMY',      ds:'Unlock 6 robots',        type:'robots',g:6,       r:5e6},
+  {id:'a_rob3',  ic:'🛸', n:'FULL ROSTER',     ds:'Unlock all 9 robots',    type:'robots',g:9,       r:5e9},
+  // Upgrade milestones
+  {id:'a_upg1',  ic:'🔧', n:'TINKERER',        ds:'Buy 50 upgrades',        type:'upg',   g:50,      r:50000},
+  {id:'a_upg2',  ic:'⚙️', n:'ENGINEER',        ds:'Buy 500 upgrades',       type:'upg',   g:500,     r:5e6},
+  {id:'a_upg3',  ic:'🏭', n:'MASS PRODUCER',   ds:'Buy 5,000 upgrades',     type:'upg',   g:5000,    r:5e9},
+  {id:'a_upg4',  ic:'🌐', n:'UPGRADE EMPIRE',  ds:'Buy 50,000 upgrades',    type:'upg',   g:50000,   r:5e12},
+  // Combo milestones
+  {id:'a_cmb1',  ic:'🔥', n:'COMBO STARTER',   ds:'Reach x10 combo',        type:'combo', g:10,      r:25000},
+  {id:'a_cmb2',  ic:'🌪️', n:'COMBO KING',      ds:'Reach x20 combo',        type:'combo', g:20,      r:500000},
+  {id:'a_cmb3',  ic:'⚡', n:'COMBO GOD',        ds:'Reach x50 combo',        type:'combo', g:50,      r:5e8}
 ];
 var POWERUPS = [
   {id:'dbl',n:'DOUBLE',  ic:'✖️',ds:'2x income 60s',cost:500,  dur:60,ef:'dbl'},
@@ -663,6 +759,40 @@ var PMILESTONES = [
   {n:'TRANSCENDENT',   ds:'Prestige 100 times',                   goal:100,ic:'♾️', rew:'×5.0 permanent mult bonus',   pts:0,   special:'mult', val:5.0},
 ];
 
+// ── MONTHLY PASS (30-day reward calendar, FREE) ──────────────────────────────
+var MONTHLY_REWARDS = [
+  {d:1, ic:'💰', t:'credits', v:1000,    lbl:'1K'},
+  {d:2, ic:'⚡', t:'credits', v:2500,    lbl:'2.5K'},
+  {d:3, ic:'💰', t:'credits', v:5000,    lbl:'5K'},
+  {d:4, ic:'🔥', t:'boost',   v:1,       lbl:'BOOST'},
+  {d:5, ic:'💰', t:'credits', v:15000,   lbl:'15K'},
+  {d:6, ic:'⭐', t:'credits', v:30000,   lbl:'30K'},
+  {d:7, ic:'🎁', t:'ppts',    v:1,       lbl:'1 PP'},
+  {d:8, ic:'💰', t:'credits', v:75000,   lbl:'75K'},
+  {d:9, ic:'💎', t:'credits', v:150000,  lbl:'150K'},
+  {d:10,ic:'🚀', t:'credits', v:300000,  lbl:'300K'},
+  {d:11,ic:'⚡', t:'boost',   v:2,       lbl:'2x BOOST'},
+  {d:12,ic:'💰', t:'credits', v:750000,  lbl:'750K'},
+  {d:13,ic:'💎', t:'credits', v:1500000, lbl:'1.5M'},
+  {d:14,ic:'🎁', t:'ppts',    v:3,       lbl:'3 PP'},
+  {d:15,ic:'🌟', t:'credits', v:5000000, lbl:'5M'},
+  {d:16,ic:'💰', t:'credits', v:1e7,     lbl:'10M'},
+  {d:17,ic:'💎', t:'credits', v:2.5e7,   lbl:'25M'},
+  {d:18,ic:'🔥', t:'boost',   v:3,       lbl:'3x BOOST'},
+  {d:19,ic:'💰', t:'credits', v:7.5e7,   lbl:'75M'},
+  {d:20,ic:'🌌', t:'credits', v:1.5e8,   lbl:'150M'},
+  {d:21,ic:'🎁', t:'ppts',    v:5,       lbl:'5 PP'},
+  {d:22,ic:'💰', t:'credits', v:5e8,     lbl:'500M'},
+  {d:23,ic:'💎', t:'credits', v:1e9,     lbl:'1B'},
+  {d:24,ic:'🚀', t:'credits', v:2.5e9,   lbl:'2.5B'},
+  {d:25,ic:'⚡', t:'boost',   v:5,       lbl:'5x BOOST'},
+  {d:26,ic:'💰', t:'credits', v:1e10,    lbl:'10B'},
+  {d:27,ic:'🌟', t:'credits', v:5e10,    lbl:'50B'},
+  {d:28,ic:'🎁', t:'ppts',    v:10,      lbl:'10 PP'},
+  {d:29,ic:'💎', t:'credits', v:5e11,    lbl:'500B'},
+  {d:30,ic:'👑', t:'mega',    v:1e13,    lbl:'JACKPOT'}
+];
+
 var THEMES = [
   {id:'',   lbl:'🔵 DEFAULT',col:'#00f5ff'},
   {id:'pink',lbl:'🩷 PINK',  col:'#ff00aa'},
@@ -689,10 +819,11 @@ var G = {
   bCombo:1, totUpg:0, crits:0, puAct:{},
   pPaths:{tap:0,auto:0,hybrid:0,xp:0,crit:0,combo:0},
   loginStreak:0, lastLogin:0, loginDay:0, loginClaimed:false,
-  milDone:{}, pmilDone:{}, apsHist:[], lastApsRec:0, curTheme:'',
+  milDone:{}, pmilDone:{}, achDone:{}, apsHist:[], lastApsRec:0, curTheme:'',
   activeChallenge:null, chalProgress:{}, chalFailed:{},
   omegaCount:0, omegaMult:1, omegaRobots:{},
   prestigeMultBonus:1,
+  monthlyDay:0, monthlyClaimed:{}, monthlyStart:0, monthlyLastClaim:0,
   topRuns:[], // best 3 runs by peak credits
   runStart:Date.now(), runPeakCredits:0, runTaps:0, totalPrestiges:0,
   playerName:'OPERATOR',
@@ -1006,7 +1137,7 @@ function spawnFt(x, y, txt, col, sz) {
 // ── TABS ──────────────────────────────────────────────────────────────────────
 var curTab = 'main';
 function showTab(t) {
-  var pages = ['main','upgrades','robots','prestige','stats','profile'];
+  var pages = ['main','upgrades','robots','prestige','stats','profile','pass'];
   for (var i = 0; i < pages.length; i++) {
     var p = document.getElementById('p-' + pages[i]);
     var tb = document.getElementById('t-' + pages[i]);
@@ -1019,6 +1150,7 @@ function showTab(t) {
   if (t === 'prestige')  { renderPrestige(); renderPathHist(); }
   if (t === 'stats')     renderStats();
   if (t === 'profile')   renderProfile();
+  if (t === 'pass')      renderMonthlyPass();
 }
 
 // ── CORE ──────────────────────────────────────────────────────────────────────
@@ -1336,6 +1468,27 @@ function chkAchievements() {
       notif('🏆 ACHIEVEMENT: ' + m.n + ' +' + fmt(m.r), '#ffaa00'); playAch();
     }
   }
+  chkSpecialAchievements();
+}
+function chkSpecialAchievements() {
+  if (!G.achDone) G.achDone = {};
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    var a = ACHIEVEMENTS[i];
+    if (G.achDone[a.id]) continue;
+    var prog = 0;
+    if (a.type === 'taps')   prog = G.tc;
+    if (a.type === 'crits')  prog = G.crits;
+    if (a.type === 'level')  prog = G.lv;
+    if (a.type === 'pc')     prog = G.totalPrestiges || G.pc;
+    if (a.type === 'omega')  prog = G.omegaCount;
+    if (a.type === 'robots') prog = Object.keys(G.robots).length;
+    if (a.type === 'upg')    prog = G.totUpg;
+    if (a.type === 'combo')  prog = G.bCombo;
+    if (prog >= a.g) {
+      G.achDone[a.id] = true; G.e += a.r; G.te += a.r;
+      notif('🏆 ' + a.n + ' UNLOCKED! +' + fmt(a.r), '#ffaa00'); playAch();
+    }
+  }
 }
 
 // ── MISSIONS ──────────────────────────────────────────────────────────────────
@@ -1449,11 +1602,15 @@ function render() {
   if (G.bAct > 0) { bl.textContent='ACTIVE: '+Math.ceil(G.bAct)+'s'; bb.textContent='⚡ ACTIVE'; bf.style.width=(G.bAct/10)*100+'%'; }
   else if (G.bCool > 0) { bl.textContent='COOLDOWN: '+Math.ceil(G.bCool)+'s'; bb.textContent='⏳ COOLING'; bf.style.width=(1-G.bCool/30)*100+'%'; }
   else { bl.textContent='BOOST READY'; bb.textContent='⚡ x10 BOOST'; bf.style.width='100%'; }
-  // achievements
+  // achievements - credit milestones + special achievements combined
   var ahtml = '';
   for (var i = 0; i < MILESTONES.length; i++) {
     var m = MILESTONES[i], done = !!G.milDone[m.n];
     ahtml += '<div class="ach' + (done?' done':'') + '"><div class="aico">'+m.ic+'</div><div class="anm">'+m.n+'</div><div class="arew">+'+fmt(m.r)+'</div></div>';
+  }
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    var a = ACHIEVEMENTS[i], done = !!(G.achDone && G.achDone[a.id]);
+    ahtml += '<div class="ach' + (done?' done':'') + '"><div class="aico">'+a.ic+'</div><div class="anm">'+a.n+'</div><div class="arew">'+(done?'✓':'+'+fmt(a.r))+'</div></div>';
   }
   document.getElementById('astrip').innerHTML = ahtml;
   // missions
@@ -1590,6 +1747,93 @@ function renderPathHist() {
   for (var i=0;i<rows.length;i++) html += '<div class="strow"><span style="color:#4a6a8a">'+rows[i][0]+'</span><span class="stv">'+rows[i][1]+'</span></div>';
   document.getElementById('pathHist').innerHTML = html;
 }
+// ── MONTHLY PASS LOGIC ───────────────────────────────────────────────────────
+function chkMonthlyReset() {
+  // Start the pass on first ever open
+  if (!G.monthlyStart) { G.monthlyStart = Date.now(); G.monthlyDay = 0; G.monthlyClaimed = {}; }
+  // Check if 30 days completed - restart calendar
+  if (G.monthlyDay >= 30) {
+    G.monthlyStart = Date.now();
+    G.monthlyDay = 0;
+    G.monthlyClaimed = {};
+  }
+}
+function canClaimMonthlyToday() {
+  var today = Math.floor(Date.now() / 86400000);
+  var lastClaim = Math.floor((G.monthlyLastClaim || 0) / 86400000);
+  return today > lastClaim || !G.monthlyLastClaim;
+}
+function claimMonthly() {
+  if (!canClaimMonthlyToday()) {
+    notif('⏳ Already claimed today — come back tomorrow!', '#ffaa00');
+    return;
+  }
+  var nextDay = (G.monthlyDay || 0) + 1;
+  if (nextDay > 30) { notif('🎉 Pass complete! Restarting...', '#b400ff'); chkMonthlyReset(); return; }
+  var reward = MONTHLY_REWARDS[nextDay - 1];
+  // Apply reward
+  if (reward.t === 'credits' || reward.t === 'mega') {
+    G.e += reward.v; G.te += reward.v;
+    notif('🎫 DAY ' + nextDay + ': +' + fmt(reward.v) + ' CREDITS!', '#b400ff');
+  } else if (reward.t === 'ppts') {
+    G.ppts += reward.v;
+    notif('🎫 DAY ' + nextDay + ': +' + reward.v + ' PRESTIGE POINTS!', '#b400ff');
+  } else if (reward.t === 'boost') {
+    G.bAct = 10 * reward.v; G.puAct.dbl = 10 * reward.v;
+    notif('🎫 DAY ' + nextDay + ': ' + reward.v + 'x BOOST ACTIVATED!', '#b400ff');
+  }
+  if (reward.t === 'mega') {
+    notif('👑 JACKPOT! +' + fmt(reward.v) + ' CREDITS!', '#ffd700');
+  }
+  G.monthlyClaimed[nextDay] = true;
+  G.monthlyDay = nextDay;
+  G.monthlyLastClaim = Date.now();
+  playLogin();
+  save();
+  renderMonthlyPass();
+}
+function renderMonthlyPass() {
+  chkMonthlyReset();
+  // Progress
+  var fill = document.getElementById('passProgFill');
+  var txt = document.getElementById('passProgTxt');
+  if (fill) fill.style.width = ((G.monthlyDay || 0) / 30 * 100) + '%';
+  if (txt) txt.textContent = 'Day ' + (G.monthlyDay || 0) + ' / 30';
+  // Claim button
+  var cw = document.getElementById('passClaimWrap');
+  if (cw) {
+    var canClaim = canClaimMonthlyToday() && (G.monthlyDay || 0) < 30;
+    if (canClaim) {
+      var nextReward = MONTHLY_REWARDS[(G.monthlyDay || 0)];
+      cw.innerHTML = '<div class="pass-claim-btn" id="passClaimBtn">🎁 CLAIM DAY ' + ((G.monthlyDay||0)+1) + ' — ' + (nextReward ? nextReward.lbl : '') + '</div>';
+    } else if ((G.monthlyDay || 0) >= 30) {
+      cw.innerHTML = '<div class="pass-claim-btn done">✓ PASS COMPLETE — RESTARTING SOON</div>';
+    } else {
+      cw.innerHTML = '<div class="pass-claim-btn done">✓ CLAIMED TODAY — COME BACK TOMORROW</div>';
+    }
+  }
+  // Grid
+  var grid = document.getElementById('passGrid');
+  if (grid) {
+    var html = '';
+    for (var i = 0; i < MONTHLY_REWARDS.length; i++) {
+      var r = MONTHLY_REWARDS[i];
+      var claimed = !!(G.monthlyClaimed && G.monthlyClaimed[r.d]);
+      var isToday = (r.d === (G.monthlyDay || 0) + 1) && canClaimMonthlyToday();
+      var isMega = r.t === 'mega';
+      var cls = claimed ? 'claimed' : isToday ? 'today' : (r.d > (G.monthlyDay||0)+1 ? 'locked' : '');
+      if (isMega) cls += ' mega';
+      html += '<div class="pass-day ' + cls + '">' +
+        '<div class="pass-day-n">' + r.d + '</div>' +
+        (claimed ? '<div class="pass-day-check">✓</div>' : '') +
+        '<div class="pass-day-ico">' + r.ic + '</div>' +
+        '<div class="pass-day-r">' + r.lbl + '</div>' +
+        '</div>';
+    }
+    grid.innerHTML = html;
+  }
+}
+
 function renderProfile() {
   // Profile card
   var careerCredits = 0;
@@ -1683,6 +1927,8 @@ document.addEventListener('touchend', function(e) {
     if (id === 'sndBtn') { G.snd=!G.snd; el.textContent=G.snd?'🔊':'🔇'; e.preventDefault(); return; }
     if (id === 'statsBtn') { showTab('stats'); e.preventDefault(); return; }
     if (id === 'profileBtn') { showTab('profile'); e.preventDefault(); return; }
+    if (id === 'passBtn') { showTab('pass'); e.preventDefault(); return; }
+    if (id === 'passClaimBtn') { claimMonthly(); e.preventDefault(); return; }
     if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} e.preventDefault(); return; }
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
     if (id === 'pathAuto')   { choosePath('auto');   e.preventDefault(); return; }
@@ -1737,6 +1983,8 @@ document.addEventListener('click', function(e) {
     if (id === 'sndBtn') { G.snd=!G.snd; el.textContent=G.snd?'🔊':'🔇'; return; }
     if (id === 'statsBtn') { showTab('stats'); return; }
     if (id === 'profileBtn') { showTab('profile'); return; }
+    if (id === 'passBtn') { showTab('pass'); return; }
+    if (id === 'passClaimBtn') { claimMonthly(); return; }
     if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} return; }
     if (id === 'pathTap')    { choosePath('tap');    return; }
     if (id === 'pathAuto')   { choosePath('auto');   return; }
@@ -1845,6 +2093,7 @@ setInterval(function() {
 }, 10000);
 
 load();
+chkMonthlyReset();
 save(); // immediate save after load
 updateCore();
 chkPMilestones();
