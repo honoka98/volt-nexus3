@@ -336,20 +336,26 @@ body{
 
 <!-- Save lastSeen immediately when page starts loading -->
 <script>
-try {
-  var _sk = 'vnx9';
-  var _raw = localStorage.getItem(_sk);
-  if (_raw) {
-    var _s = JSON.parse(_raw);
-    // If saved ls is older than the separate _ls key, keep the older one
-    var _sepLs = parseInt(localStorage.getItem(_sk+'_ls')||'0');
-    if (_sepLs && _sepLs < (_s.ls||Date.now())) {
-      _s.ls = _sepLs;
-      localStorage.setItem(_sk, JSON.stringify(_s));
-    }
-  }
-} catch(e) {}
+// (timestamp validation now handled in load() with proper clamping)
 </script>
+<!-- BACKUP / EXPORT-IMPORT MODAL -->
+<div class="overlay" id="backupModal" style="display:none">
+  <div class="mdl" style="max-width:360px">
+    <div class="mdl-h">💾 BACKUP &amp; RESTORE</div>
+    <div style="font-size:9px;color:#4a6a8a;margin-bottom:12px;line-height:1.5">Save your progress as a code. Copy it somewhere safe, then paste it on any device to restore — even after clearing your browser!</div>
+
+    <div style="text-align:left;margin-bottom:6px;font-family:'Orbitron',monospace;font-size:9px;color:#00f5ff;letter-spacing:1px">📤 EXPORT YOUR SAVE</div>
+    <textarea id="exportBox" readonly style="width:100%;height:70px;background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.2);border-radius:8px;color:#c8e0ff;font-family:monospace;font-size:9px;padding:8px;resize:none;margin-bottom:6px;" onclick="this.select()"></textarea>
+    <div class="mdl-btn" id="copyBtn" style="margin-bottom:14px">📋 COPY TO CLIPBOARD</div>
+
+    <div style="text-align:left;margin-bottom:6px;font-family:'Orbitron',monospace;font-size:9px;color:#b400ff;letter-spacing:1px">📥 IMPORT A SAVE</div>
+    <textarea id="importBox" placeholder="Paste your save code here..." style="width:100%;height:70px;background:rgba(180,0,255,0.05);border:1px solid rgba(180,0,255,0.2);border-radius:8px;color:#c8e0ff;font-family:monospace;font-size:9px;padding:8px;resize:none;margin-bottom:6px;"></textarea>
+    <div class="mdl-btn" id="importBtn" style="background:linear-gradient(135deg,#2a0050,#1a0030);border-color:rgba(180,0,255,0.5);color:#e080ff;margin-bottom:8px">📥 RESTORE THIS SAVE</div>
+
+    <div class="mdl-btn" id="backupCloseBtn" style="background:rgba(0,0,0,0.3);border-color:rgba(100,100,100,0.3);color:#4a6a8a;">CLOSE</div>
+  </div>
+</div>
+
 <div id="notif"></div>
 
 <!-- OFFLINE MODAL -->
@@ -436,6 +442,7 @@ try {
   <div class="toolbar">
     <div class="tool-btn" id="profileBtn"><span class="tool-ico">👤</span><span class="tool-lbl">PROFILE</span></div>
     <div class="tool-btn" id="passBtn"><span class="tool-ico">🎫</span><span class="tool-lbl">PASS</span></div>
+    <div class="tool-btn" id="saveBtn"><span class="tool-ico">💾</span><span class="tool-lbl">BACKUP</span></div>
     <div class="tool-btn" id="statsBtn"><span class="tool-ico">📊</span><span class="tool-lbl">STATS</span></div>
     <div class="tool-btn" id="sndBtn"><span class="tool-ico">🔊</span><span class="tool-lbl">SOUND</span></div>
     <div class="tool-btn danger" id="resetBtn"><span class="tool-ico">🗑</span><span class="tool-lbl">RESET</span></div>
@@ -949,9 +956,17 @@ function load() {
     // Check both the save timestamp AND the separate lastSeen timestamp
     // Use whichever is OLDER (longer ago = more offline time)
     var lastSeenSave = s.ls || now;
-    var lastSeenSep = parseInt(localStorage.getItem(SK + '_ls') || '0') || now;
-    var lastSeen = Math.min(lastSeenSave, lastSeenSep); // oldest = most time passed
+    var lsRaw = localStorage.getItem(SK + '_ls');
+    var lastSeenSep = lsRaw ? parseInt(lsRaw) : lastSeenSave;
+    // Validate: timestamps must be reasonable (after year 2024, not in future)
+    var MIN_VALID = 1704067200000; // Jan 1 2024
+    if (!lastSeenSave || lastSeenSave < MIN_VALID || lastSeenSave > now) lastSeenSave = now;
+    if (!lastSeenSep  || lastSeenSep  < MIN_VALID || lastSeenSep  > now) lastSeenSep  = now;
+    var lastSeen = Math.min(lastSeenSave, lastSeenSep);
     var elapsed = (now - lastSeen) / 1000; // seconds
+    // Clamp elapsed to max 72 hours - never more, no matter what
+    if (elapsed < 0) elapsed = 0;
+    if (elapsed > 72 * 3600) elapsed = 72 * 3600;
     // Clear the separate lastSeen so it doesn't affect next load
     try { localStorage.removeItem(SK + '_ls'); } catch(e) {}
 
@@ -995,41 +1010,28 @@ function load() {
     // Cap offline time at 72 hours
     var offlineSecs = Math.min(elapsed, 72 * 3600);
 
-    // Calculate FULL active earning rate directly from current stats.
-    // Tap power per single tap (at max combo, with avg crit):
-    var tapPow = 1;
-    for (var i = 0; i < UPGRADES.length; i++) {
-      if (UPGRADES[i].ef === 'c') tapPow += UPGRADES[i].v * (G.upg[UPGRADES[i].id] || 0);
+    // BALANCED offline rate: use the player's ACTUAL measured earning rate
+    // (tracked while playing) rather than a theoretical maximum.
+    // This makes offline ≈ real active play, not an exploit.
+    //
+    // Primary source: G.realRate = average credits/sec measured during play.
+    // Fallback: pure auto income (aps) if no rate tracked yet.
+    var trackedRate = G.realRate || 0;
+    // Offline earns at the real measured rate, but at most 60% of it
+    // (you're not tapping non-stop while away, robots keep working fully).
+    // Auto income always counts 100%, tap-portion counts toward the cap.
+    var offlineRate;
+    if (trackedRate > aps) {
+      // Player was actively earning more than auto alone (tapping)
+      // Give full auto + 50% of the tap-portion offline
+      var tapPortion = trackedRate - aps;
+      offlineRate = aps + tapPortion * 0.5;
+    } else {
+      // Only auto income matters
+      offlineRate = aps;
     }
-    var rTapAdd = 0, rTapMult = 1;
-    for (var i = 0; i < ROBOTS.length; i++) {
-      var r = ROBOTS[i];
-      if (G.robots[r.id]) {
-        if (r.bt === 'c')  rTapAdd  += r.bv;
-        if (r.bt === 'tm') rTapMult *= r.bv;
-      }
-    }
-    tapPow = (tapPow + rTapAdd) * rTapMult * (G.pm || 1) * (G.tapB || 1);
-    var tbS = 1;
-    for (var i = 0; i < PSHOP.length; i++) {
-      if (G.psOwn[PSHOP[i].id] && PSHOP[i].t === 'tb') tbS += PSHOP[i].v;
-    }
-    tapPow *= tbS;
-    // Max combo multiplier
-    var maxCombo = (G.psOwn['cm'] ? 20 : 10) * (G.comboB || 1);
-    // Average crit multiplier
-    var critCh = 0.1 * (G.critB || 1); if (critCh > 0.5) critCh = 0.5;
-    var critMx = (G.critB >= 2) ? 30 : 15;
-    var avgCrit = 1 + critCh * ((5 + critMx) / 2) * (G.critB || 1);
-    // 8 taps per second of active play
-    var tapsPerSec = 8;
-    var activeTapRate = tapPow * maxCombo * avgCrit * tapsPerSec;
-
-    // Full active rate = tap income + auto income
-    var fullActiveRate = activeTapRate + aps;
-    // Also never go below the tracked real rate
-    var trackedRate = G.realRate || G.peakRate || 0;
-    var offlineRate = Math.max(fullActiveRate, trackedRate, aps);
+    // Safety: never negative, never below pure auto
+    offlineRate = Math.max(offlineRate, aps);
 
     var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
     var gained = Math.floor(offlineRate * offlineSecs * baseOffline);
@@ -1899,6 +1901,67 @@ function renderStats() {
   document.getElementById('stpage').innerHTML = html;
 }
 
+// ── BACKUP: EXPORT / IMPORT ──────────────────────────────────────────────────
+function openBackup() {
+  save(); // make sure latest state is saved
+  // Encode the save as base64 for a clean copyable code
+  try {
+    var raw = JSON.stringify(G);
+    var encoded = btoa(unescape(encodeURIComponent(raw)));
+    // Add a prefix so we can validate on import
+    var code = 'VNX9:' + encoded;
+    document.getElementById('exportBox').value = code;
+  } catch(e) {
+    document.getElementById('exportBox').value = 'Error generating code';
+  }
+  document.getElementById('importBox').value = '';
+  document.getElementById('backupModal').style.display = 'flex';
+}
+function copyBackup() {
+  var box = document.getElementById('exportBox');
+  box.select();
+  box.setSelectionRange(0, 99999);
+  var ok = false;
+  try { ok = document.execCommand('copy'); } catch(e) {}
+  // Modern clipboard API fallback
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(box.value).then(function(){
+      notif('📋 Save code copied!', '#00ff88');
+    }).catch(function(){
+      notif(ok ? '📋 Copied!' : '⚠ Select & copy manually', ok ? '#00ff88' : '#ffaa00');
+    });
+  } else {
+    notif(ok ? '📋 Save code copied!' : '⚠ Select & copy manually', ok ? '#00ff88' : '#ffaa00');
+  }
+}
+function importBackup() {
+  var code = document.getElementById('importBox').value.trim();
+  if (!code) { notif('⚠ Paste a save code first', '#ffaa00'); return; }
+  // Validate prefix
+  if (code.indexOf('VNX9:') !== 0) {
+    notif('❌ Invalid save code', '#ff0050');
+    return;
+  }
+  try {
+    var encoded = code.substring(5);
+    var raw = decodeURIComponent(escape(atob(encoded)));
+    var imported = JSON.parse(raw);
+    // Basic validation - must have core fields
+    if (typeof imported.e === 'undefined' || typeof imported.te === 'undefined') {
+      notif('❌ Corrupted save code', '#ff0050');
+      return;
+    }
+    if (!confirm('Restore this save? Your current progress will be replaced!')) return;
+    // Write to localStorage and reload
+    localStorage.setItem(SK, JSON.stringify(imported));
+    localStorage.setItem(SK + '_ls', Date.now().toString());
+    notif('✅ Save restored! Reloading...', '#00ff88');
+    setTimeout(function(){ location.reload(); }, 800);
+  } catch(e) {
+    notif('❌ Could not read save code', '#ff0050');
+  }
+}
+
 // ── GLOBAL EVENT DELEGATION (works on iOS Safari) ────────────────────────────
 // Touch handler - passive so scrolling works, only fires on interactive elements
 var touchStartY = 0;
@@ -1928,6 +1991,10 @@ document.addEventListener('touchend', function(e) {
     if (id === 'statsBtn') { showTab('stats'); e.preventDefault(); return; }
     if (id === 'profileBtn') { showTab('profile'); e.preventDefault(); return; }
     if (id === 'passBtn') { showTab('pass'); e.preventDefault(); return; }
+    if (id === 'saveBtn') { openBackup(); e.preventDefault(); return; }
+    if (id === 'copyBtn') { copyBackup(); e.preventDefault(); return; }
+    if (id === 'importBtn') { importBackup(); e.preventDefault(); return; }
+    if (id === 'backupCloseBtn') { document.getElementById('backupModal').style.display='none'; e.preventDefault(); return; }
     if (id === 'passClaimBtn') { claimMonthly(); e.preventDefault(); return; }
     if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} e.preventDefault(); return; }
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
@@ -1984,6 +2051,10 @@ document.addEventListener('click', function(e) {
     if (id === 'statsBtn') { showTab('stats'); return; }
     if (id === 'profileBtn') { showTab('profile'); return; }
     if (id === 'passBtn') { showTab('pass'); return; }
+    if (id === 'saveBtn') { openBackup(); return; }
+    if (id === 'copyBtn') { copyBackup(); return; }
+    if (id === 'importBtn') { importBackup(); return; }
+    if (id === 'backupCloseBtn') { document.getElementById('backupModal').style.display='none'; return; }
     if (id === 'passClaimBtn') { claimMonthly(); return; }
     if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} return; }
     if (id === 'pathTap')    { choosePath('tap');    return; }
