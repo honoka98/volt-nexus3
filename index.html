@@ -34,11 +34,17 @@ body{
 .wrap{max-width:480px;margin:0 auto;padding:12px 12px calc(140px + env(safe-area-inset-bottom));touch-action:pan-y;-webkit-overflow-scrolling:touch;overflow-y:auto;}
 
 /* HEADER */
-.hdr{padding:10px 0;text-align:center;border-bottom:1px solid rgba(0,245,255,0.15);margin-bottom:10px;position:relative;}
-.hdr h1{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;letter-spacing:5px;background:linear-gradient(90deg,#00f5ff,#b400ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.hdr-sub{font-size:9px;color:#4a6a8a;letter-spacing:2px;margin-top:2px;}
-.hdr-btns{position:absolute;right:0;top:10px;display:flex;gap:4px;}
-.ibtn{background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);border-radius:6px;color:#c8e0ff;font-size:12px;padding:5px 7px;display:inline-block;cursor:pointer;}
+.hdr{padding:12px 0 8px;text-align:center;}
+.hdr h1{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;letter-spacing:6px;background:linear-gradient(90deg,#00f5ff,#b400ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-sub{font-size:9px;color:#4a6a8a;letter-spacing:3px;margin-top:3px;}
+.toolbar{display:flex;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,245,255,0.15);}
+.tool-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.15);border-radius:8px;padding:8px 4px;cursor:pointer;transition:all .15s;}
+.tool-btn:active{background:rgba(0,245,255,0.15);transform:scale(.96);}
+.tool-btn.danger{border-color:rgba(255,80,80,0.2);}
+.tool-btn.danger:active{background:rgba(255,80,80,0.12);}
+.tool-ico{font-size:18px;line-height:1;}
+.tool-lbl{font-family:'Orbitron',monospace;font-size:7px;letter-spacing:1px;color:#4a6a8a;}
+.tool-btn.danger .tool-lbl{color:#ff5050;}
 
 /* TABS */
 .tabs{display:flex;gap:3px;margin-bottom:10px;background:#060f1e;border:1px solid rgba(0,245,255,0.1);border-radius:10px;padding:3px;}
@@ -233,6 +239,27 @@ body{
 /* OMEGA RESET BTN */
 .omega-btn{width:100%;padding:12px;background:linear-gradient(135deg,#1a0000,#0d0000);border:1px solid rgba(255,0,80,0.4);border-radius:10px;color:#ff0050;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;text-shadow:0 0 10px #ff0050;margin-bottom:10px;display:block;text-align:center;}
 .omega-btn.lk{opacity:0.3;pointer-events:none;}
+/* PROFILE */
+.profile-card{background:linear-gradient(135deg,#0a1628,#060f1e);border:1px solid rgba(0,245,255,0.25);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;}
+.profile-avatar{font-size:48px;margin-bottom:6px;}
+.profile-name{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:#00f5ff;text-shadow:0 0 12px #00f5ff;letter-spacing:2px;}
+.profile-title{font-size:9px;color:#b400ff;letter-spacing:2px;margin-top:3px;}
+.profile-stats-row{display:flex;justify-content:space-around;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,245,255,0.1);}
+.profile-stat{text-align:center;}
+.profile-stat-v{font-family:'Orbitron',monospace;font-size:14px;color:#00ff88;font-weight:700;}
+.profile-stat-l{font-size:7px;color:#4a6a8a;letter-spacing:1px;margin-top:2px;}
+.topruns-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.run-card{background:#0a1628;border:1px solid rgba(255,170,0,0.2);border-radius:9px;padding:11px 12px;display:flex;align-items:center;gap:10px;}
+.run-card.rank1{border-color:rgba(255,215,0,0.6);background:linear-gradient(135deg,#1a1500,#0a1628);}
+.run-card.rank2{border-color:rgba(192,192,192,0.5);background:linear-gradient(135deg,#15151a,#0a1628);}
+.run-card.rank3{border-color:rgba(205,127,50,0.5);background:linear-gradient(135deg,#1a1000,#0a1628);}
+.run-medal{font-size:24px;min-width:30px;text-align:center;}
+.run-info{flex:1;}
+.run-credits{font-family:'Orbitron',monospace;font-size:13px;color:#00f5ff;font-weight:700;text-shadow:0 0 8px #00f5ff;}
+.run-meta{font-size:8px;color:#4a6a8a;margin-top:2px;}
+.run-date{font-size:7px;color:#4a6a8a;text-align:right;}
+.empty-runs{text-align:center;font-size:9px;color:#4a6a8a;padding:20px;letter-spacing:1px;}
+.name-edit{background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.2);border-radius:6px;color:#00f5ff;font-family:'Orbitron',monospace;font-size:12px;padding:4px 8px;text-align:center;width:140px;letter-spacing:1px;}
 
 /* THEME */
 .throw{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
@@ -373,21 +400,17 @@ try {
 </div>
 
 <div class="wrap">
-  <!-- DEBUG BAR - shows save status -->
-  <div id="debugBar" style="background:#060f1e;border:1px solid rgba(0,245,255,0.2);border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:9px;color:#4a6a8a;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center;">
-    <span id="debugSave">SAVE: never</span>
-    <span id="debugAps">APS: 0</span>
-    <span id="debugBalance">BAL: 0</span>
-  </div>
-
   <div class="hdr">
     <h1>VOLT NEXUS</h1>
-    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.0 — BUILD 2024</div>
-    <div class="hdr-btns">
-      <div class="ibtn" id="sndBtn">🔊</div>
-      <div class="ibtn" id="statsBtn">📊</div>
-      <div class="ibtn" id="resetBtn">🗑</div>
-    </div>
+    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.0</div>
+  </div>
+
+  <!-- Clean icon toolbar -->
+  <div class="toolbar">
+    <div class="tool-btn" id="profileBtn"><span class="tool-ico">👤</span><span class="tool-lbl">PROFILE</span></div>
+    <div class="tool-btn" id="statsBtn"><span class="tool-ico">📊</span><span class="tool-lbl">STATS</span></div>
+    <div class="tool-btn" id="sndBtn"><span class="tool-ico">🔊</span><span class="tool-lbl">SOUND</span></div>
+    <div class="tool-btn danger" id="resetBtn"><span class="tool-ico">🗑</span><span class="tool-lbl">RESET</span></div>
   </div>
 
   <div class="tabs">
@@ -500,6 +523,16 @@ try {
       <canvas id="chart" style="width:100%;height:70px;display:block;"></canvas>
     </div>
     <div id="stpage"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="p-profile" style="display:none">
+    <div class="sec">PLAYER PROFILE</div>
+    <div class="profile-card" id="profileCard"></div>
+    <div class="sec">🏆 TOP 3 RUNS</div>
+    <div class="topruns-list" id="toprunsList"></div>
+    <div class="sec">CAREER STATS</div>
+    <div class="stcard" id="careerStats"></div>
   </div>
 </div>
 
@@ -660,6 +693,9 @@ var G = {
   activeChallenge:null, chalProgress:{}, chalFailed:{},
   omegaCount:0, omegaMult:1, omegaRobots:{},
   prestigeMultBonus:1,
+  topRuns:[], // best 3 runs by peak credits
+  runStart:Date.now(), runPeakCredits:0, runTaps:0, totalPrestiges:0,
+  playerName:'OPERATOR',
 };
 
 // ── FORMAT ────────────────────────────────────────────────────────────────────
@@ -766,13 +802,7 @@ function save() {
     var data = JSON.stringify(G);
     localStorage.setItem(SK, data);
     localStorage.setItem(SK + '_ls', G.ls.toString());
-    var check = localStorage.getItem(SK);
-    var ds = document.getElementById('debugSave');
-    if (ds) ds.textContent = check ? 'SAVED ✓ ' + new Date().toLocaleTimeString() : 'SAVE FAILED!';
-  } catch(e) {
-    var ds = document.getElementById('debugSave');
-    if (ds) ds.textContent = 'SAVE ERROR: ' + e.message;
-  }
+  } catch(e) {}
 }
 
 // ── LOAD ─────────────────────────────────────────────────────────────────────
@@ -976,7 +1006,7 @@ function spawnFt(x, y, txt, col, sz) {
 // ── TABS ──────────────────────────────────────────────────────────────────────
 var curTab = 'main';
 function showTab(t) {
-  var pages = ['main','upgrades','robots','prestige','stats'];
+  var pages = ['main','upgrades','robots','prestige','stats','profile'];
   for (var i = 0; i < pages.length; i++) {
     var p = document.getElementById('p-' + pages[i]);
     var tb = document.getElementById('t-' + pages[i]);
@@ -988,6 +1018,7 @@ function showTab(t) {
   if (t === 'robots')    renderRobots();
   if (t === 'prestige')  { renderPrestige(); renderPathHist(); }
   if (t === 'stats')     renderStats();
+  if (t === 'profile')   renderProfile();
 }
 
 // ── CORE ──────────────────────────────────────────────────────────────────────
@@ -1141,7 +1172,27 @@ function skipChallenge() {
   G.activeChallenge = null;
   doPrestigeReset(pendingPath);
 }
+function recordRun() {
+  // Save this run's stats before reset
+  var run = {
+    credits: G.runPeakCredits || G.te || 0,
+    taps: G.tc || 0,
+    level: G.lv || 1,
+    prestige: G.pc || 0,
+    duration: Math.floor((Date.now() - (G.runStart || Date.now())) / 1000),
+    date: new Date().toLocaleDateString(),
+    path: ''
+  };
+  if (!G.topRuns) G.topRuns = [];
+  G.topRuns.push(run);
+  // Sort by credits descending, keep top 3
+  G.topRuns.sort(function(a, b) { return b.credits - a.credits; });
+  G.topRuns = G.topRuns.slice(0, 3);
+  G.totalPrestiges = (G.totalPrestiges || 0) + 1;
+}
 function doPrestigeReset(p) {
+  recordRun();
+  G.runStart = Date.now(); G.runPeakCredits = 0;
   G.pc++; G.ppts += G.pc;
   G.pm = (1 + G.pc * 0.5) * G.prestigeMultBonus * G.omegaMult;
   G.pPaths[p] = (G.pPaths[p] || 0) + 1;
@@ -1172,6 +1223,7 @@ function showOmegaModal() {
 }
 function doOmegaReset() {
   document.getElementById('omegaModal').style.display = 'none';
+  recordRun();
   G.omegaCount++;
   G.omegaMult = Math.pow(10, G.omegaCount);
   // Save some robot unlocks as omega reward
@@ -1374,13 +1426,6 @@ var lastRender = 0;
 function render() {
   var now = Date.now(); if (now - lastRender < 150) return; lastRender = now;
   var a = calcAPS();
-  // Update debug bar
-  var ds = document.getElementById('debugSave');
-  var da = document.getElementById('debugAps');
-  var db = document.getElementById('debugBalance');
-  if (ds && G.ls) ds.textContent = 'SAVED: ' + Math.floor((Date.now()-G.ls)/1000) + 's ago';
-  if (da) da.textContent = 'APS: ' + a.toFixed(1);
-  if (db) db.textContent = 'BAL: ' + fmt(G.e);
   document.getElementById('eVal').textContent = fmt(G.e);
   document.getElementById('ePs').textContent = '+' + a.toFixed(1) + ' / sec (AUTO)';
   document.getElementById('corePow').textContent = '+' + fmt(calcCP()) + ' / tap';
@@ -1545,6 +1590,54 @@ function renderPathHist() {
   for (var i=0;i<rows.length;i++) html += '<div class="strow"><span style="color:#4a6a8a">'+rows[i][0]+'</span><span class="stv">'+rows[i][1]+'</span></div>';
   document.getElementById('pathHist').innerHTML = html;
 }
+function renderProfile() {
+  // Profile card
+  var careerCredits = 0;
+  if (G.topRuns) for (var i=0;i<G.topRuns.length;i++) careerCredits += G.topRuns[i].credits;
+  var pc = document.getElementById('profileCard');
+  if (pc) {
+    pc.innerHTML = '<div class="profile-avatar">' + CORES[Math.min(G.pc, CORES.length-1)].ic + '</div>' +
+      '<div class="profile-name">' + (G.playerName || 'OPERATOR') + '</div>' +
+      '<div class="profile-title">LEVEL ' + G.lv + ' — ' + lvlName(G.lv) + '</div>' +
+      '<div class="profile-stats-row">' +
+        '<div class="profile-stat"><div class="profile-stat-v">' + (G.totalPrestiges||0) + '</div><div class="profile-stat-l">PRESTIGES</div></div>' +
+        '<div class="profile-stat"><div class="profile-stat-v">' + (G.omegaCount||0) + '</div><div class="profile-stat-l">OMEGA</div></div>' +
+        '<div class="profile-stat"><div class="profile-stat-v">' + fmt(G.te) + '</div><div class="profile-stat-l">CURRENT</div></div>' +
+      '</div>';
+  }
+  // Top runs
+  var tr = document.getElementById('toprunsList');
+  if (tr) {
+    if (!G.topRuns || G.topRuns.length === 0) {
+      tr.innerHTML = '<div class="empty-runs">🏁 No runs recorded yet.<br>Prestige to record your first run!</div>';
+    } else {
+      var medals = ['🥇','🥈','🥉'];
+      var html = '';
+      for (var i=0;i<G.topRuns.length;i++) {
+        var r = G.topRuns[i];
+        var dur = r.duration < 60 ? r.duration+'s' : r.duration < 3600 ? Math.floor(r.duration/60)+'m' : Math.floor(r.duration/3600)+'h '+Math.floor((r.duration%3600)/60)+'m';
+        html += '<div class="run-card rank'+(i+1)+'"><div class="run-medal">'+medals[i]+'</div>' +
+          '<div class="run-info"><div class="run-credits">'+fmt(r.credits)+' CREDITS</div>' +
+          '<div class="run-meta">⚡'+fmt(r.taps)+' taps · LVL '+r.level+' · ⏱'+dur+'</div></div>' +
+          '<div class="run-date">'+r.date+'</div></div>';
+      }
+      tr.innerHTML = html;
+    }
+  }
+  // Career stats
+  var cs = document.getElementById('careerStats');
+  if (cs) {
+    var bestRun = (G.topRuns && G.topRuns.length) ? G.topRuns[0].credits : 0;
+    cs.innerHTML = '<div class="sttit">🎖 CAREER</div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Best run ever</span><span class="stv">'+fmt(bestRun)+'</span></div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Total prestiges</span><span class="stv">'+(G.totalPrestiges||0)+'</span></div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Omega resets</span><span class="stv">'+(G.omegaCount||0)+'</span></div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Total taps (all time)</span><span class="stv">'+fmt(G.tc)+'</span></div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Robots unlocked</span><span class="stv">'+Object.keys(G.robots).length+'/'+ROBOTS.length+'</span></div>' +
+      '<div class="strow"><span style="color:#4a6a8a">Current level</span><span class="stv">'+G.lv+'</span></div>';
+  }
+}
+
 function renderStats() {
   recordAps(); drawChart();
   var sections = [
@@ -1589,7 +1682,8 @@ document.addEventListener('touchend', function(e) {
     if (id === 'pbtn' && !el.classList.contains('lk')) { startPrestige(); e.preventDefault(); return; }
     if (id === 'sndBtn') { G.snd=!G.snd; el.textContent=G.snd?'🔊':'🔇'; e.preventDefault(); return; }
     if (id === 'statsBtn') { showTab('stats'); e.preventDefault(); return; }
-    if (id === 'resetBtn') { if(confirm('Reset ALL progress?')){localStorage.removeItem(SK);location.reload();} e.preventDefault(); return; }
+    if (id === 'profileBtn') { showTab('profile'); e.preventDefault(); return; }
+    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} e.preventDefault(); return; }
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
     if (id === 'pathAuto')   { choosePath('auto');   e.preventDefault(); return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); e.preventDefault(); return; }
@@ -1642,7 +1736,8 @@ document.addEventListener('click', function(e) {
     if (id === 'pbtn' && !el.classList.contains('lk')) { startPrestige(); return; }
     if (id === 'sndBtn') { G.snd=!G.snd; el.textContent=G.snd?'🔊':'🔇'; return; }
     if (id === 'statsBtn') { showTab('stats'); return; }
-    if (id === 'resetBtn') { if(confirm('Reset ALL progress?')){localStorage.removeItem(SK);location.reload();} return; }
+    if (id === 'profileBtn') { showTab('profile'); return; }
+    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} return; }
     if (id === 'pathTap')    { choosePath('tap');    return; }
     if (id === 'pathAuto')   { choosePath('auto');   return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); return; }
@@ -1691,6 +1786,8 @@ function tick() {
   var now = Date.now(), dt = (now - lastTick) / 1000; lastTick = now;
   var a = calcAPS();
   if (a > 0) { var g = a*dt; G.e += g; G.te += g; G.dEarn += g; }
+  // Track peak credits this run
+  if (G.e > (G.runPeakCredits||0)) G.runPeakCredits = G.e;
   // Track REAL earning rate (includes taps + auto) over last 10 seconds
   if (now - lastEarnCheck >= 1000) {
     var earnedThisSec = G.te - lastEarnTotal;
