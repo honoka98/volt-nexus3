@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>VOLT NEXUS v9</title>
+<title>VOLT NEXUS v9.1</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -435,7 +435,7 @@ body{
 <div class="wrap">
   <div class="hdr">
     <h1>VOLT NEXUS</h1>
-    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.0</div>
+    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.1 — FIXED</div>
   </div>
 
   <!-- Clean icon toolbar -->
@@ -946,6 +946,17 @@ function save() {
 // ── LOAD ─────────────────────────────────────────────────────────────────────
 function load() {
   try {
+    // Check for fresh-start flag (set by full reset)
+    var freshFlag = localStorage.getItem(SK + '_fresh');
+    if (freshFlag) {
+      localStorage.removeItem(SK + '_fresh');
+      // Start completely fresh - G is already at default values
+      G.ls = Date.now();
+      chkDailyReset();
+      chkLoginDay();
+      save();
+      return;
+    }
     var raw = localStorage.getItem(SK);
     if (!raw) { chkDailyReset(); chkLoginDay(); return; }
 
@@ -1901,6 +1912,17 @@ function renderStats() {
   document.getElementById('stpage').innerHTML = html;
 }
 
+// ── FULL RESET (clean wipe, no welcome-back) ─────────────────────────────────
+function doFullReset() {
+  try {
+    // Nuclear reset: clear EVERYTHING for this site
+    localStorage.clear();
+    // Set fresh flag so load() starts clean
+    localStorage.setItem(SK + '_fresh', '1');
+  } catch(e) {}
+  location.reload();
+}
+
 // ── BACKUP: EXPORT / IMPORT ──────────────────────────────────────────────────
 function openBackup() {
   save(); // make sure latest state is saved
@@ -1996,7 +2018,7 @@ document.addEventListener('touchend', function(e) {
     if (id === 'importBtn') { importBackup(); e.preventDefault(); return; }
     if (id === 'backupCloseBtn') { document.getElementById('backupModal').style.display='none'; e.preventDefault(); return; }
     if (id === 'passClaimBtn') { claimMonthly(); e.preventDefault(); return; }
-    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} e.preventDefault(); return; }
+    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){doFullReset();} e.preventDefault(); return; }
     if (id === 'pathTap')    { choosePath('tap');    e.preventDefault(); return; }
     if (id === 'pathAuto')   { choosePath('auto');   e.preventDefault(); return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); e.preventDefault(); return; }
@@ -2056,7 +2078,7 @@ document.addEventListener('click', function(e) {
     if (id === 'importBtn') { importBackup(); return; }
     if (id === 'backupCloseBtn') { document.getElementById('backupModal').style.display='none'; return; }
     if (id === 'passClaimBtn') { claimMonthly(); return; }
-    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){localStorage.removeItem(SK);localStorage.removeItem(SK+'_ls');location.reload();} return; }
+    if (id === 'resetBtn') { if(confirm('Reset ALL progress? This wipes EVERYTHING including daily logins.')){doFullReset();} return; }
     if (id === 'pathTap')    { choosePath('tap');    return; }
     if (id === 'pathAuto')   { choosePath('auto');   return; }
     if (id === 'pathHybrid') { choosePath('hybrid'); return; }
@@ -2162,6 +2184,16 @@ window.addEventListener('blur', function() {
 setInterval(function() {
   try { localStorage.setItem(SK + '_ls', Date.now().toString()); } catch(e) {}
 }, 10000);
+
+// EMERGENCY URL RESET: add ?reset=1 to the URL to force a complete wipe
+if (window.location.search.indexOf('reset=1') !== -1) {
+  try {
+    // Nuclear option - clear ALL localStorage for this site
+    localStorage.clear();
+  } catch(e) {}
+  // Remove the query string and reload clean
+  window.location.href = window.location.pathname;
+}
 
 load();
 chkMonthlyReset();
