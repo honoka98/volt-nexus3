@@ -849,12 +849,19 @@ function load() {
     }
     tapPow *= tbShop;
 
-    // Simulate active play: assume ~5 taps/second average with combo bonus
-    var simTapsPerSec = 5;
-    var avgCombo = 5; // average combo while actively playing
-    var simulatedTapIncome = tapPow * simTapsPerSec * avgCombo;
+    // Simulate FULL active play at peak performance:
+    // - 8 taps/second (fast continuous tapping)
+    // - max combo sustained (10, or 20/50 with combo upgrades)
+    // - average crit bonus factored in (10% chance * avg ~12x = +1.1x avg)
+    var simTapsPerSec = 8;
+    var maxCombo = (G.psOwn['cm'] ? 20 : 10) * (G.comboB || 1);
+    var critChance = 0.1 * (G.critB || 1);
+    if (critChance > 0.5) critChance = 0.5;
+    var critMax = (G.critB >= 2) ? 30 : 15;
+    var avgCritMult = 1 + critChance * ((5 + critMax) / 2) * (G.critB || 1);
+    var simulatedTapIncome = tapPow * simTapsPerSec * maxCombo * avgCritMult;
 
-    // Total offline income = auto income + simulated tap income
+    // Total offline income = auto income + full active tap income
     var combinedPerSec = aps + simulatedTapIncome;
 
     var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
