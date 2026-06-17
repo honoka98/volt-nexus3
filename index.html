@@ -37,6 +37,7 @@ body{
 .hdr{padding:12px 0 8px;text-align:center;}
 .hdr h1{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;letter-spacing:6px;background:linear-gradient(90deg,#00f5ff,#b400ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .hdr-sub{font-size:9px;color:#4a6a8a;letter-spacing:3px;margin-top:3px;}
+.version-badge{color:#00ff88;background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.4);border-radius:4px;padding:1px 6px;letter-spacing:1px;font-weight:700;text-shadow:0 0 6px rgba(0,255,136,0.5);margin-left:4px;}
 .toolbar{display:flex;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,245,255,0.15);}
 .tool-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.15);border-radius:8px;padding:8px 4px;cursor:pointer;transition:all .15s;}
 .tool-btn:active{background:rgba(0,245,255,0.15);transform:scale(.96);}
@@ -96,6 +97,15 @@ body{
 /* SECTION TITLE */
 .sec{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:3px;color:#4a6a8a;margin-bottom:7px;display:flex;align-items:center;gap:6px;}
 .sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,245,255,0.2),transparent);}
+.sec.collapsible{cursor:pointer;justify-content:space-between;}
+.sec.collapsible::after{display:none;}
+.sec.collapsible>span:first-child{display:flex;align-items:center;gap:6px;flex:1;}
+.sec.collapsible>span:first-child::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,245,255,0.2),transparent);margin-left:6px;}
+.collapse-info{display:flex;align-items:center;gap:8px;margin-left:8px;}
+#missionCount{font-size:8px;color:#00ff88;letter-spacing:1px;}
+.collapse-arrow{font-size:8px;color:#4a6a8a;transition:transform .2s;display:inline-block;}
+.collapse-arrow.collapsed{transform:rotate(-90deg);}
+.mlist.collapsed{display:none!important;}
 
 /* BOOST */
 .boost-wrap{margin-bottom:8px;}
@@ -435,7 +445,7 @@ body{
 <div class="wrap">
   <div class="hdr">
     <h1>VOLT NEXUS</h1>
-    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL v9.2 — FIXED</div>
+    <div class="hdr-sub">ENERGY DOMINANCE PROTOCOL <span class="version-badge">v9.2 ✓</span></div>
   </div>
 
   <!-- Clean icon toolbar -->
@@ -505,7 +515,10 @@ body{
     <div class="sec">DAILY LOGIN</div>
     <div class="login-strip" id="loginStrip"></div>
     <div class="claim-btn" id="claimBtn">🎁 CLAIM DAILY REWARD</div>
-    <div class="sec">DAILY MISSIONS</div>
+    <div class="sec collapsible" id="missionHeader">
+      <span>DAILY MISSIONS</span>
+      <span class="collapse-info"><span id="missionCount"></span><span class="collapse-arrow" id="missionArrow">▼</span></span>
+    </div>
     <div class="mlist" id="mlist"></div>
     <div class="sec">ACHIEVEMENTS</div>
     <div class="astrip" id="astrip"></div>
@@ -733,11 +746,18 @@ var PSHOP = [
   {id:'xpm',n:'NEURAL ACCELERATOR',ic:'🧠',  ds:'2x XP forever',          c:2,t:'xm',v:2}
 ];
 var MISSIONS = [
-  {id:'mt',n:'TAP WARRIOR',  ic:'👆',tp:'taps',g:100,  r:500},
-  {id:'me',n:'CREDIT HUNTER',ic:'💰',tp:'earn', g:5000, r:2000},
-  {id:'mu',n:'UPGRADE PATH', ic:'🔧',tp:'upg',  g:3,    r:1000},
-  {id:'mc',n:'COMBO KING',   ic:'🔥',tp:'cmb',  g:5,    r:1500},
-  {id:'mb',n:'BOOST RIDER',  ic:'⚡',tp:'bst',  g:2,    r:800}
+  {id:'mt', n:'TAP WARRIOR',    ic:'👆',tp:'taps', g:100,    r:500},
+  {id:'mt2',n:'TAP FRENZY',     ic:'✊',tp:'taps', g:500,    r:2500},
+  {id:'me', n:'CREDIT HUNTER',  ic:'💰',tp:'earn', g:5000,   r:2000},
+  {id:'me2',n:'CREDIT TYCOON',  ic:'💎',tp:'earn', g:100000, r:15000},
+  {id:'mu', n:'UPGRADE PATH',   ic:'🔧',tp:'upg',  g:3,      r:1000},
+  {id:'mu2',n:'UPGRADE SPREE',  ic:'⚙️',tp:'upg',  g:10,     r:5000},
+  {id:'mc', n:'COMBO KING',     ic:'🔥',tp:'cmb',  g:5,      r:1500},
+  {id:'mc2',n:'COMBO MASTER',   ic:'🌪️',tp:'cmb',  g:10,     r:6000},
+  {id:'mb', n:'BOOST RIDER',    ic:'⚡',tp:'bst',  g:2,      r:800},
+  {id:'mcr',n:'CRIT SEEKER',    ic:'💥',tp:'crit', g:10,     r:3000},
+  {id:'mcr2',n:'CRIT HUNTER',   ic:'☄️',tp:'crit', g:50,     r:12000},
+  {id:'ml', n:'LEVEL CLIMBER',  ic:'⭐',tp:'level',g:3,      r:4000}
 ];
 var LOGIN_REWARDS = [
   {ic:'💰',r:500},{ic:'⚡',r:1000},{ic:'🔥',r:2000},{ic:'💎',r:5000},
@@ -822,7 +842,7 @@ var G = {
   bAct:0, bCool:0, ppts:0, psOwn:{},
   tapB:1, autoB:1, xpB:1, critB:1, comboB:1,
   robots:{}, theme:'',
-  dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0,
+  dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0, dCrits:0, dLevels:0,
   bCombo:1, totUpg:0, crits:0, puAct:{},
   pPaths:{tap:0,auto:0,hybrid:0,xp:0,crit:0,combo:0},
   loginStreak:0, lastLogin:0, loginDay:0, loginClaimed:false,
@@ -831,6 +851,7 @@ var G = {
   omegaCount:0, omegaMult:1, omegaRobots:{},
   prestigeMultBonus:1,
   monthlyDay:0, monthlyClaimed:{}, monthlyStart:0, monthlyLastClaim:0,
+  missionsCollapsed:false,
   topRuns:[], // best 3 runs by peak credits
   runStart:Date.now(), runPeakCredits:0, runTaps:0, totalPrestiges:0,
   playerName:'OPERATOR',
@@ -1223,7 +1244,7 @@ function handleTap(e) {
   var pow = calcCP() * critM * sm;
 
   G.e += pow; G.te += pow; G.tc++; G.dTaps++;
-  if (isCrit) { G.crits++; playCrit(); } else { playTap(pow); }
+  if (isCrit) { G.crits++; G.dCrits = (G.dCrits||0)+1; playCrit(); } else { playTap(pow); }
 
   G.sTimer = 2; G.streak++;
   G.cTimer = 3; var comboMax = (G.psOwn['cm'] ? 20 : 10) * (G.comboB||1); G.combo = Math.min(G.combo + 0.5 * (G.comboB||1), comboMax);
@@ -1233,7 +1254,7 @@ function handleTap(e) {
   var xg = Math.max(1, Math.floor(pow * 0.1)) * (G.psOwn['xpm'] ? 2 : 1) * (G.xpB||1);
   G.xp += xg;
   while (G.xp >= xpFor(G.lv + 1)) {
-    G.xp -= xpFor(G.lv + 1); G.lv++;
+    G.xp -= xpFor(G.lv + 1); G.lv++; G.dLevels = (G.dLevels||0)+1;
     notif('⬆ LEVEL UP! — ' + lvlName(G.lv));
     playLvl();
     var bonus = G.lv * 100; G.e += bonus; G.te += bonus;
@@ -1364,7 +1385,7 @@ function doPrestigeReset(p) {
   G.e = sc; G.te = 0; G.tc = 0;
   G.upg = JSON.parse(JSON.stringify(DU));
   G.lv = 1; G.xp = 0; G.combo = 1; G.cTimer = 0; G.streak = 0;
-  G.dTaps=0; G.dEarn=0; G.dUpg=0; G.dCmb=0; G.dBst=0; G.dm={};
+  G.dTaps=0; G.dEarn=0; G.dUpg=0; G.dCmb=0; G.dBst=0; G.dCrits=0; G.dLevels=0; G.dm={};
   G.chalProgress = {};
   playPrestige(); updateCore();
   chkPMilestones();
@@ -1395,7 +1416,7 @@ function doOmegaReset() {
     bAct:0, bCool:0, ppts:0, psOwn:{},
     tapB:1, autoB:1, xpB:1, critB:1, comboB:1,
     robots: saved.omegaRobots,
-    dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0,
+    dm:{}, dReset:0, dTaps:0, dEarn:0, dUpg:0, dCmb:0, dBst:0, dCrits:0, dLevels:0,
     bCombo:1, totUpg:0, crits:0, puAct:{},
     pPaths:{tap:0,auto:0,hybrid:0,xp:0,crit:0,combo:0},
     loginStreak:0, lastLogin:0, loginDay:0, loginClaimed:false,
@@ -1523,18 +1544,20 @@ function chkMissions() {
     var m = MISSIONS[i];
     if (G.dm[m.id] === 'done') continue;
     var p = 0;
-    if (m.tp === 'taps') p = G.dTaps;
-    if (m.tp === 'earn') p = G.dEarn;
-    if (m.tp === 'upg')  p = G.dUpg;
-    if (m.tp === 'cmb')  p = G.dCmb;
-    if (m.tp === 'bst')  p = G.dBst;
+    if (m.tp === 'taps')  p = G.dTaps;
+    if (m.tp === 'earn')  p = G.dEarn;
+    if (m.tp === 'upg')   p = G.dUpg;
+    if (m.tp === 'cmb')   p = G.dCmb;
+    if (m.tp === 'bst')   p = G.dBst;
+    if (m.tp === 'crit')  p = G.dCrits || 0;
+    if (m.tp === 'level') p = G.dLevels || 0;
     if (p >= m.g) { G.dm[m.id] = 'done'; G.e += m.r; G.te += m.r; notif('🎯 MISSION: ' + m.n + ' +' + fmt(m.r), '#ffaa00'); playMission(); }
   }
 }
 function chkDailyReset() {
   if (!G.dReset || Date.now() - G.dReset > 86400000) {
     G.dReset = Date.now(); G.dm = {};
-    G.dTaps=0; G.dEarn=0; G.dUpg=0; G.dCmb=0; G.dBst=0;
+    G.dTaps=0; G.dEarn=0; G.dUpg=0; G.dCmb=0; G.dBst=0; G.dCrits=0; G.dLevels=0;
   }
 }
 
@@ -1649,6 +1672,11 @@ function render() {
     mhtml += '<div class="mcard'+(done?' done':'')+'"><div class="mico">'+m.ic+'</div><div class="minf"><div class="mnm">'+m.n+'</div><div class="mprg">'+fmt(Math.min(p,m.g))+'/'+fmt(m.g)+'</div><div class="mpbar"><div class="mpfil" style="width:'+pct+'%"></div></div></div><div class="mrew">'+(done?'✓ DONE':'+'+fmt(m.r))+'</div></div>';
   }
   document.getElementById('mlist').innerHTML = mhtml;
+  // Update mission count badge (completed/total)
+  var mDone = 0;
+  for (var mi = 0; mi < MISSIONS.length; mi++) { if (G.dm[MISSIONS[mi].id] === 'done') mDone++; }
+  var mcEl = document.getElementById('missionCount');
+  if (mcEl) mcEl.textContent = mDone + '/' + MISSIONS.length;
   // powerups
   var puhtml = '';
   for (var i = 0; i < POWERUPS.length; i++) {
@@ -1773,6 +1801,18 @@ function renderPathHist() {
   for (var i=0;i<rows.length;i++) html += '<div class="strow"><span style="color:#4a6a8a">'+rows[i][0]+'</span><span class="stv">'+rows[i][1]+'</span></div>';
   document.getElementById('pathHist').innerHTML = html;
 }
+// ── COLLAPSIBLE MISSIONS ─────────────────────────────────────────────────────
+function toggleMissions() {
+  G.missionsCollapsed = !G.missionsCollapsed;
+  applyMissionCollapse();
+}
+function applyMissionCollapse() {
+  var mlist = document.getElementById('mlist');
+  var arrow = document.getElementById('missionArrow');
+  if (mlist) { if (G.missionsCollapsed) mlist.classList.add('collapsed'); else mlist.classList.remove('collapsed'); }
+  if (arrow) { if (G.missionsCollapsed) arrow.classList.add('collapsed'); else arrow.classList.remove('collapsed'); }
+}
+
 // ── MONTHLY PASS LOGIC ───────────────────────────────────────────────────────
 function chkMonthlyReset() {
   // Start the pass on first ever open
@@ -2210,6 +2250,7 @@ if (window.location.search.indexOf('reset=1') !== -1) {
 
 load();
 chkMonthlyReset();
+applyMissionCollapse();
 save(); // immediate save after load
 updateCore();
 chkPMilestones();
