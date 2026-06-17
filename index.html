@@ -2066,6 +2066,7 @@ document.addEventListener('touchend', function(e) {
     if (id === 'statsBtn') { showTab('stats'); e.preventDefault(); return; }
     if (id === 'profileBtn') { showTab('profile'); e.preventDefault(); return; }
     if (id === 'passBtn') { showTab('pass'); e.preventDefault(); return; }
+    if (id === 'missionHeader' || id === 'missionArrow' || id === 'missionCount' || (el.closest && el.closest('#missionHeader'))) { toggleMissions(); e.preventDefault(); return; }
     if (id === 'saveBtn') { openBackup(); e.preventDefault(); return; }
     if (id === 'copyBtn') { copyBackup(); e.preventDefault(); return; }
     if (id === 'importBtn') { importBackup(); e.preventDefault(); return; }
@@ -2126,6 +2127,7 @@ document.addEventListener('click', function(e) {
     if (id === 'statsBtn') { showTab('stats'); return; }
     if (id === 'profileBtn') { showTab('profile'); return; }
     if (id === 'passBtn') { showTab('pass'); return; }
+    if (id === 'missionHeader' || id === 'missionArrow' || id === 'missionCount' || (el.closest && el.closest('#missionHeader'))) { toggleMissions(); return; }
     if (id === 'saveBtn') { openBackup(); return; }
     if (id === 'copyBtn') { copyBackup(); return; }
     if (id === 'importBtn') { importBackup(); return; }
