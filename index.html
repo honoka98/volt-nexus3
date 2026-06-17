@@ -829,43 +829,15 @@ function load() {
     // Cap offline time at 72 hours
     var offlineSecs = Math.min(elapsed, 72 * 3600);
 
-    // Calculate tap power (as if actively tapping the whole time)
-    var tapPow = 1;
-    for (var i = 0; i < UPGRADES.length; i++) {
-      if (UPGRADES[i].ef === 'c') tapPow += UPGRADES[i].v * (G.upg[UPGRADES[i].id] || 0);
-    }
-    var robotTapAdd = 0, robotTapMult = 1;
-    for (var i = 0; i < ROBOTS.length; i++) {
-      var r = ROBOTS[i];
-      if (G.robots[r.id]) {
-        if (r.bt === 'c')  robotTapAdd  += r.bv;
-        if (r.bt === 'tm') robotTapMult *= r.bv;
-      }
-    }
-    tapPow = (tapPow + robotTapAdd) * robotTapMult * (G.pm || 1) * (G.tapB || 1);
-    var tbShop = 1;
-    for (var i = 0; i < PSHOP.length; i++) {
-      if (G.psOwn[PSHOP[i].id] && PSHOP[i].t === 'tb') tbShop += PSHOP[i].v;
-    }
-    tapPow *= tbShop;
-
-    // Simulate FULL active play at peak performance:
-    // - 8 taps/second (fast continuous tapping)
-    // - max combo sustained (10, or 20/50 with combo upgrades)
-    // - average crit bonus factored in (10% chance * avg ~12x = +1.1x avg)
-    var simTapsPerSec = 8;
-    var maxCombo = (G.psOwn['cm'] ? 20 : 10) * (G.comboB || 1);
-    var critChance = 0.1 * (G.critB || 1);
-    if (critChance > 0.5) critChance = 0.5;
-    var critMax = (G.critB >= 2) ? 30 : 15;
-    var avgCritMult = 1 + critChance * ((5 + critMax) / 2) * (G.critB || 1);
-    var simulatedTapIncome = tapPow * simTapsPerSec * maxCombo * avgCritMult;
-
-    // Total offline income = auto income + full active tap income
-    var combinedPerSec = aps + simulatedTapIncome;
+    // Use the player's REAL recorded earning rate (taps + auto combined)
+    // This matches exactly what they earn while actively playing.
+    // Fall back to auto-only rate if no real rate recorded yet.
+    var realRate = G.realRate || G.peakRate || aps;
+    // Use the higher of: real recorded rate, or pure auto rate
+    var offlineRate = Math.max(realRate, aps);
 
     var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
-    var gained = Math.floor(combinedPerSec * offlineSecs * baseOffline);
+    var gained = Math.floor(offlineRate * offlineSecs * baseOffline);
     window.OFFLINE_TIMEBONUS = 'FULL ACTIVE';
 
     // Store as pending - will be added when user taps COLLECT
@@ -1675,10 +1647,27 @@ document.addEventListener('click', function(e) {
 
 // ── MAIN LOOP ─────────────────────────────────────────────────────────────────
 var lastTick = Date.now();
+var earnSamples = [];
+var lastEarnCheck = Date.now();
+var lastEarnTotal = 0;
 function tick() {
   var now = Date.now(), dt = (now - lastTick) / 1000; lastTick = now;
   var a = calcAPS();
   if (a > 0) { var g = a*dt; G.e += g; G.te += g; G.dEarn += g; }
+  // Track REAL earning rate (includes taps + auto) over last 10 seconds
+  if (now - lastEarnCheck >= 1000) {
+    var earnedThisSec = G.te - lastEarnTotal;
+    lastEarnTotal = G.te;
+    lastEarnCheck = now;
+    earnSamples.push(earnedThisSec);
+    if (earnSamples.length > 10) earnSamples.shift();
+    // Store the average real earning rate for offline use
+    var sum = 0;
+    for (var si = 0; si < earnSamples.length; si++) sum += earnSamples[si];
+    G.realRate = sum / earnSamples.length;
+    // Keep a peak rate too
+    if (!G.peakRate || G.realRate > G.peakRate) G.peakRate = G.realRate;
+  }
   if (G.puAct.atp > 0) { var g2=calcCP()*dt*3; G.e+=g2; G.te+=g2; G.tc+=Math.floor(dt*3); G.dTaps+=Math.floor(dt*3); }
   // timers
   var keys = Object.keys(G.puAct);
