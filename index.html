@@ -824,12 +824,42 @@ function load() {
       if (G.psOwn[PSHOP[i].id] && PSHOP[i].t === 'ab') abShop += PSHOP[i].v;
     }
     aps *= abShop;
-    // Offline doubler
-    if (G.psOwn['o2x']) aps *= 2;
+    // (offline doubler applied separately below)
 
     // Cap offline time at 72 hours
     var offlineSecs = Math.min(elapsed, 72 * 3600);
-    var gained = Math.floor(aps * offlineSecs);
+
+    // Calculate tap power (as if actively tapping the whole time)
+    var tapPow = 1;
+    for (var i = 0; i < UPGRADES.length; i++) {
+      if (UPGRADES[i].ef === 'c') tapPow += UPGRADES[i].v * (G.upg[UPGRADES[i].id] || 0);
+    }
+    var robotTapAdd = 0, robotTapMult = 1;
+    for (var i = 0; i < ROBOTS.length; i++) {
+      var r = ROBOTS[i];
+      if (G.robots[r.id]) {
+        if (r.bt === 'c')  robotTapAdd  += r.bv;
+        if (r.bt === 'tm') robotTapMult *= r.bv;
+      }
+    }
+    tapPow = (tapPow + robotTapAdd) * robotTapMult * (G.pm || 1) * (G.tapB || 1);
+    var tbShop = 1;
+    for (var i = 0; i < PSHOP.length; i++) {
+      if (G.psOwn[PSHOP[i].id] && PSHOP[i].t === 'tb') tbShop += PSHOP[i].v;
+    }
+    tapPow *= tbShop;
+
+    // Simulate active play: assume ~5 taps/second average with combo bonus
+    var simTapsPerSec = 5;
+    var avgCombo = 5; // average combo while actively playing
+    var simulatedTapIncome = tapPow * simTapsPerSec * avgCombo;
+
+    // Total offline income = auto income + simulated tap income
+    var combinedPerSec = aps + simulatedTapIncome;
+
+    var baseOffline = G.psOwn['o2x'] ? 2 : 1;  // offline doubler shop item
+    var gained = Math.floor(combinedPerSec * offlineSecs * baseOffline);
+    window.OFFLINE_TIMEBONUS = 'FULL ACTIVE';
 
     // Store as pending - will be added when user taps COLLECT
     window.OFFLINE_PENDING = gained;
@@ -843,7 +873,7 @@ function load() {
     var el3 = document.getElementById('offBalance');
     if (el1) el1.textContent = fmtT(Math.max(0, elapsed));
     if (el2) el2.textContent = '+' + fmt(gained) + ' CREDITS' + (gained === 0 ? ' (need Auto-Upgrades!)' : '');
-    if (el3) el3.textContent = 'Tap COLLECT to add: ' + fmt(G.e) + ' + ' + fmt(gained) + ' = ' + fmt(G.e + gained);
+    if (el3) el3.textContent = '⚡ FULL ACTIVE RATE! → ' + fmt(G.e) + ' + ' + fmt(gained) + ' = ' + fmt(G.e + gained);
     if (gained > 0) document.getElementById('offModal').style.display = 'flex';
 
     chkDailyReset();
